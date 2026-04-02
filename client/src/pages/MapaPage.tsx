@@ -13,9 +13,9 @@ import { getCasosMap } from '../api'
 import { useTranslation } from '../i18n/LanguageContext'
 
 // Custom marker icons for individual cases
-const caseIcon = L.divIcon({
-  className: 'case-marker',
-  html: '<div class="case-marker-dot"></div>',
+const caseIconProgramat = L.divIcon({
+  className: 'case-marker programat',
+  html: '<div class="case-marker-dot programat"></div>',
   iconSize: [10, 10],
   iconAnchor: [5, 5],
 })
@@ -23,8 +23,8 @@ const caseIcon = L.divIcon({
 const caseIconImminent = L.divIcon({
   className: 'case-marker imminent',
   html: '<div class="case-marker-dot imminent"></div>',
-  iconSize: [12, 12],
-  iconAnchor: [6, 6],
+  iconSize: [14, 14],
+  iconAnchor: [7, 7],
 })
 
 type EstatFilter = 'tots' | 'imminent' | 'programat'
@@ -185,7 +185,9 @@ export default function MapaPage() {
               if (c.provincia && c.provincia !== ciutat) cityParts.push(c.provincia)
               const cityLine = cityParts.join(', ')
 
-              const fullAddress = [street, cityLine].filter(Boolean).join(', ') || c.adreca_original || ''
+              // Keep street and city as separate lines for visual clarity
+              const addressLine1 = street || c.adreca_original || ''
+              const addressLine2 = cityLine
 
               // Format date: "3 feb 2025"
               const dp = c.data_desnonament?.split('-')
@@ -198,15 +200,18 @@ export default function MapaPage() {
               <Marker
                 key={c.id}
                 position={[c.latitud, c.longitud]}
-                icon={c.estat === 'imminent' ? caseIconImminent : caseIcon}
+                icon={c.estat === 'imminent' ? caseIconImminent : caseIconProgramat}
               >
-                <Popup maxWidth={300} minWidth={220} className="mobile-popup">
+                <Popup maxWidth={300} minWidth={220} className="mobile-popup" autoPanPaddingTopLeft={[380, 10]}>
                   <div className="map-popup rich">
                     <div className="popup-top-row">
                       <span className={`popup-estat-badge ${c.estat}`}>{estatLabel(c.estat)}</span>
                       <span className="popup-date">{dateStr}{c.hora_desnonament ? ` · ${c.hora_desnonament}h` : ''}</span>
                     </div>
-                    <p className="popup-address-full">{fullAddress}</p>
+                    <div className="popup-address-full">
+                      <div className="popup-address-street">{addressLine1}</div>
+                      {addressLine2 && <div className="popup-address-city">{addressLine2}</div>}
+                    </div>
                     {c.tipus_be && (
                       <div className="popup-detail-row">
                         <span className="popup-detail-icon">{'\uD83C\uDFE0'}</span>

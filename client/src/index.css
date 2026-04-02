@@ -23,7 +23,7 @@
   --color-purple: #a855f7;
   
   /* Estat colors */
-  --color-programat: #3b82f6;
+  --color-programat: #2563eb;
   --color-imminent: #ef4444;
   --color-cancelat: #6b7280;
   --color-executat: #1f2937;
@@ -213,7 +213,7 @@
 [data-theme="light"] .resultat-badge.executat { background: rgba(239, 68, 68, 0.12); color: #dc2626; }
 [data-theme="light"] .resultat-badge.pendent { background: rgba(148, 163, 184, 0.12); color: #64748b; }
 
-[data-theme="light"] .mini-badge.programat { background: rgba(96, 165, 250, 0.15); color: #2563eb; }
+[data-theme="light"] .mini-badge.programat { background: rgba(37, 99, 235, 0.12); color: #2563eb; }
 [data-theme="light"] .mini-badge.imminent { background: rgba(239, 68, 68, 0.12); color: #dc2626; }
 [data-theme="light"] .mini-badge.suspès { background: rgba(251, 191, 36, 0.12); color: #b45309; }
 [data-theme="light"] .mini-badge.cancelat { background: rgba(34, 197, 94, 0.12); color: #16a34a; }
@@ -1299,7 +1299,7 @@ a:hover {
   text-transform: uppercase;
 }
 
-.mini-badge.programat { background: rgba(96, 165, 250, 0.2); color: #93c5fd; }
+.mini-badge.programat { background: rgba(37, 99, 235, 0.2); color: #93c5fd; }
 .mini-badge.imminent { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
 .mini-badge.suspès { background: rgba(251, 191, 36, 0.2); color: #fcd34d; }
 .mini-badge.cancelat { background: rgba(34, 197, 94, 0.2); color: #86efac; }
@@ -1451,8 +1451,11 @@ a:hover {
   .popup-address {
     font-size: 0.72rem;
   }
-  .popup-address-full {
+  .popup-address-full .popup-address-street {
     font-size: 0.78rem;
+  }
+  .popup-address-full .popup-address-city {
+    font-size: 0.7rem;
   }
   .popup-detail-row {
     font-size: 0.7rem;
@@ -2045,28 +2048,31 @@ a:hover {
    Individual Cases (Casos) Styles
    ======================================== */
 
-/* Case marker on map */
+/* Case marker on map — programat = blue calm, imminent = red pulsing */
 .case-marker-dot {
+  border-radius: 50%;
+}
+
+.case-marker-dot.programat {
   width: 10px;
   height: 10px;
-  background: #ef4444;
+  background: #3b82f6;
   border: 2px solid #fff;
-  border-radius: 50%;
-  box-shadow: 0 0 6px rgba(239, 68, 68, 0.6);
+  box-shadow: 0 0 6px rgba(59, 130, 246, 0.5);
 }
 
 .case-marker-dot.imminent {
-  width: 11px;
-  height: 11px;
+  width: 14px;
+  height: 14px;
   background: #dc2626;
-  border: 2px solid #fef08a;
-  animation: pulse-marker 3s ease-in-out infinite;
-  box-shadow: 0 0 8px rgba(220, 38, 38, 0.5);
+  border: 2.5px solid #fef08a;
+  animation: pulse-marker 1.8s ease-in-out infinite;
+  box-shadow: 0 0 12px rgba(220, 38, 38, 0.7), 0 0 24px rgba(220, 38, 38, 0.3);
 }
 
 @keyframes pulse-marker {
   0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.1); opacity: 0.85; }
+  50% { transform: scale(1.3); opacity: 0.9; }
 }
 
 .case-marker-dot-big {
@@ -2204,7 +2210,7 @@ a:hover {
   letter-spacing: 0.5px;
 }
 .popup-estat.imminent { background: #fef2f2; color: #dc2626; }
-.popup-estat.programat { background: #fff7ed; color: #ea580c; }
+.popup-estat.programat { background: #eff6ff; color: #2563eb; }
 .popup-estat.executat { background: #f0fdf4; color: #16a34a; }
 .popup-estat.suspès, .popup-estat.suspes { background: #fefce8; color: #ca8a04; }
 .popup-estat.cancelat { background: #f8fafc; color: #64748b; }
@@ -2230,8 +2236,8 @@ a:hover {
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
-.popup-estat-badge.imminent { background: #fef2f2; color: #dc2626; }
-.popup-estat-badge.programat { background: #fff7ed; color: #ea580c; }
+.popup-estat-badge.imminent { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+.popup-estat-badge.programat { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
 .popup-estat-badge.executat { background: #f0fdf4; color: #16a34a; }
 .popup-estat-badge.suspès { background: #fefce8; color: #ca8a04; }
 .popup-estat-badge.cancelat { background: #f8fafc; color: #64748b; }
@@ -2247,11 +2253,19 @@ a:hover {
   line-height: 1.3;
 }
 .popup-address-full {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #1e293b;
   margin: 4px 0 8px;
   line-height: 1.35;
+}
+.popup-address-street {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+.popup-address-city {
+  font-size: 0.78rem;
+  font-weight: 400;
+  color: #64748b;
+  margin-top: 1px;
 }
 .popup-detail-row {
   display: flex;
@@ -2366,9 +2380,9 @@ a:hover {
   border-color: rgba(220, 38, 38, 0.4);
 }
 .map-estat-filter button.active.programat {
-  background: rgba(234, 88, 12, 0.2);
-  color: #fdba74;
-  border-color: rgba(234, 88, 12, 0.4);
+  background: rgba(37, 99, 235, 0.2);
+  color: #93c5fd;
+  border-color: rgba(37, 99, 235, 0.4);
 }
 .map-estat-filter button:hover:not(.active) {
   background: rgba(255, 255, 255, 0.06);
@@ -2465,7 +2479,7 @@ a:hover {
 }
 
 .cas-estat.imminent { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
-.cas-estat.programat { background: #fff7ed; color: #ea580c; border: 1px solid #fed7aa; }
+.cas-estat.programat { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
 .cas-estat.executat { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
 .cas-estat.suspès, .cas-estat.suspes { background: #fefce8; color: #ca8a04; border: 1px solid #fde68a; }
 .cas-estat.cancelat { background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; }
