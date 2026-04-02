@@ -147,10 +147,11 @@ export default function MapaPage() {
           <MarkerClusterGroup
             chunkedLoading
             maxClusterRadius={60}
-            spiderfyOnMaxZoom
+            zoomToBoundsOnClick={true}
+            spiderfyOnMaxZoom={false}
             showCoverageOnHover={false}
             iconCreateFunction={createClusterIcon}
-            disableClusteringAtZoom={14}
+            disableClusteringAtZoom={17}
           >
             {cases.map(c => {
               // Build Google Maps-style address: "C/ Nom Via, 5, 3º A, 08001 Localitat, Provincia"

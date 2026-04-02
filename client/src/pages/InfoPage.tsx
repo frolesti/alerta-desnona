@@ -101,31 +101,51 @@ export default function InfoPage() {
       <div className="info-section">
         <h2>{t('info_data_title')}</h2>
         <p>{t('info_data_intro')}</p>
-        <ul>
-          <li><strong>Boletín Oficial del Estado (BOE)</strong> — boe.es</li>
-          <li><strong>Tablón Edictal Único (TEU)</strong> — Taulell unificat d'edictes judicials</li>
-          <li><strong>Consejo General del Poder Judicial (CGPJ)</strong> — poderjudicial.es</li>
-        </ul>
-        <h3>{t('info_data_regional')}</h3>
-        <ul>
-          <li><strong>DOGC</strong> — Diari Oficial de la Generalitat de Catalunya</li>
-          <li><strong>BOCM</strong> — Boletín Oficial de la Comunidad de Madrid</li>
-          <li><strong>DOGV / DOCV</strong> — Diari Oficial de la Generalitat Valenciana</li>
-          <li><strong>BOJA</strong> — Boletín Oficial de la Junta de Andalucía</li>
-          <li><strong>EHAA / BOPV</strong> — Euskal Herriko Agintaritzaren Aldizkaria</li>
-          <li><strong>DOG</strong> — Diario Oficial de Galicia</li>
-          <li><strong>BOIB</strong> — Butlletí Oficial de les Illes Balears</li>
-          <li><strong>BOC</strong> — Boletín Oficial de Canarias</li>
-          <li><strong>BOA</strong> — Boletín Oficial de Aragón</li>
-          <li><strong>BOCyL</strong> — Boletín Oficial de Castilla y León</li>
-          <li><strong>DOCM</strong> — Diario Oficial de Castilla-La Mancha</li>
-          <li><strong>BORM</strong> — Boletín Oficial de la Región de Murcia</li>
-          <li><strong>DOE</strong> — Diario Oficial de Extremadura</li>
-          <li><strong>BOPA</strong> — Boletín Oficial del Principado de Asturias</li>
-          <li><strong>BOC</strong> — Boletín Oficial de Cantabria</li>
-          <li><strong>BON</strong> — Boletín Oficial de Navarra</li>
-          <li><strong>BOR</strong> — Boletín Oficial de La Rioja</li>
-        </ul>
+
+        <div className="info-card">
+          <h3>📊 {t('info_data_current_source_title')}</h3>
+          <p>{t('info_data_current_source_desc')}</p>
+          <ul>
+            <li><strong>Portal de Subastas del BOE</strong> — <a href="https://subastas.boe.es" target="_blank" rel="noopener noreferrer">subastas.boe.es</a></li>
+          </ul>
+          <p className="info-note">{t('info_data_boe_explanation')}</p>
+        </div>
+
+        <div className="info-card">
+          <h3>📈 {t('info_data_stats_source_title')}</h3>
+          <p>{t('info_data_stats_source_desc')}</p>
+          <ul>
+            <li><strong>INE — Instituto Nacional de Estadística</strong> — <a href="https://www.ine.es/jaxiT3/Tabla.htm?t=10743" target="_blank" rel="noopener noreferrer">Taula 10743</a></li>
+          </ul>
+        </div>
+
+        <div className="info-card">
+          <h3>⚠️ {t('info_data_limitations_title')}</h3>
+          <p>{t('info_data_limitations_desc')}</p>
+          <ul>
+            <li>{t('info_data_limitation_1')}</li>
+            <li>{t('info_data_limitation_2')}</li>
+            <li>{t('info_data_limitation_3')}</li>
+          </ul>
+        </div>
+
+        <div className="info-card">
+          <h3>🔮 {t('info_data_future_title')}</h3>
+          <p>{t('info_data_future_desc')}</p>
+          <ul>
+            <li><strong>TEU</strong> — Tablón Edictal Único (edictes judicials)</li>
+            <li><strong>CGPJ</strong> — Consejo General del Poder Judicial</li>
+          </ul>
+          <h4>{t('info_data_regional')}</h4>
+          <ul className="info-compact-list">
+            <li><strong>DOGC</strong> — Catalunya</li>
+            <li><strong>BOCM</strong> — Madrid</li>
+            <li><strong>DOGV</strong> — C. Valenciana</li>
+            <li><strong>BOJA</strong> — Andalucía</li>
+            <li><strong>EHAA/BOPV</strong> — Euskadi</li>
+            <li><strong>DOG</strong> — Galicia</li>
+          </ul>
+        </div>
       </div>
 
       <div className="info-section">
