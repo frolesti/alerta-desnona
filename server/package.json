@@ -7,9 +7,12 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
-    "seed": "tsx src/seed.ts",
-    "fetch-ine": "tsx src/fetch-ine.ts",
-    "fetch-cases": "tsx src/fetch-subastas-boe.ts"
+    "update": "tsx src/daily-update.ts",
+    "update:dry": "tsx src/daily-update.ts --dry-run",
+    "scrape": "tsx src/fetch-subastas-by-id.ts",
+    "parse": "tsx src/bulk-parse-adreces.ts",
+    "geocode": "tsx src/geocode-per-ciutat.ts",
+    "fetch-ine": "tsx src/fetch-ine.ts"
   },
   "dependencies": {
     "better-sqlite3": "^11.0.0",
