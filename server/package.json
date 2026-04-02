@@ -1,0 +1,37 @@
+{
+  "name": "alerta-desnona-server",
+  "version": "1.0.0",
+  "description": "Backend API per Alerta Desnona",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "seed": "tsx src/seed.ts",
+    "fetch-ine": "tsx src/fetch-ine.ts",
+    "fetch-cases": "tsx src/fetch-subastas-boe.ts"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.3.1",
+    "express": "^4.18.2",
+    "node-cron": "^3.0.3",
+    "nodemailer": "^6.9.8",
+    "openai": "^6.33.0",
+    "uuid": "^9.0.0",
+    "web-push": "^3.6.7"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.8",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.10.0",
+    "@types/node-cron": "^3.0.11",
+    "@types/nodemailer": "^6.4.14",
+    "@types/uuid": "^9.0.7",
+    "@types/web-push": "^3.6.3",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.2"
+  }
+}
