@@ -1,7 +1,7 @@
 # Alerta Desnona — Roadmap de Producció
 
 Full de ruta per convertir Alerta Desnona en una plataforma completa:
-app mòbil + web desktop, amb notificacions push i desplegament automatitzat.
+pàgina web (PWA) + app mòbil (Capacitor), amb notificacions push i desplegament automatitzat.
 
 ---
 
@@ -35,26 +35,36 @@ app mòbil + web desktop, amb notificacions push i desplegament automatitzat.
 ## Fase 2: Email amb Nodemailer
 > Resum diari per email als usuaris subscrits.
 
-- [ ] Configurar `nodemailer` transport amb SMTP
-- [ ] Template HTML per resum diari
-- [ ] Integrar amb `cron.ts` (resum diari real)
-- [ ] Secrets SMTP a cada environment
+- [x] Configurar `nodemailer` transport amb SMTP (`services/email.ts`)
+- [x] Template HTML per resum diari (taula responsive amb estils inline)
+- [x] Template HTML per alerta individual (desnonament imminent)
+- [x] Integrar amb `cron.ts` (resum diari real + emails imminents)
+- [x] Secrets SMTP afegits al workflow i `.env.example`
+- [ ] Configurar compte SMTP real (Gmail App Password o Mailgun) (manual)
+- [ ] Provar enviament d'email real (manual)
 
-## Fase 3: Capacitor (App nativa)
-> Embolcallar el SPA en una app nativa per a Android i iOS.
+## Fase 3: Capacitor (App nativa) + Push natiu
+> Embolcallar la PWA en una app nativa per a Android i iOS, amb push natiu.
 
-- [ ] Instal·lar Capacitor
-- [ ] Configurar `capacitor.config.ts`
-- [ ] Build per Android (APK/AAB)
-- [ ] Build per iOS (Xcode project)
-- [ ] Integrar FCM per push natiu
+- [x] Instal·lar Capacitor (`@capacitor/core`, `@capacitor/cli`)
+- [x] Configurar `capacitor.config.ts`
+- [x] Afegir plataforma Android (`npx cap add android`)
+- [x] Afegir plataforma iOS (`npx cap add ios`)
+- [x] Plugin `@capacitor/push-notifications` per FCM/APNs
+- [x] Hook `useNativePush.ts` per push natiu
+- [x] `PushToggle` unificat (detecta web vs natiu automàticament)
+- [x] Endpoint API `PUT /api/usuaris/:id/fcm-token`
+- [x] Columna `fcm_token` a BD + migració automàtica
+- [ ] Crear projecte Firebase + `google-services.json` (manual)
+- [ ] Integrar `firebase-admin` al servidor per enviar via FCM (Fase 4)
+- [ ] Compilar APK (requereix Android Studio) (manual)
+- [ ] Compilar iOS (requereix Xcode + Mac) (manual)
 
-## Fase 4: Firebase Cloud Messaging
-> Push natiu per a les apps de les stores (Android + iOS).
+## Fase 4: Firebase Cloud Messaging (servidor)
+> Enviar push natiu des del servidor via FCM.
 
-- [ ] Crear projecte Firebase
 - [ ] `firebase-admin` al servidor
-- [ ] Endpoint per registrar FCM tokens
+- [ ] Enviar push via FCM quan hi ha desnonaments imminents
 - [ ] Unificar push (web-push + FCM) al servei de notificacions
 
 ## Fase 5: Deploy a Producció

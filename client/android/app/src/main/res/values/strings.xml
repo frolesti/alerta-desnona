@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Alerta Desnona</string>
+    <string name="title_activity_main">Alerta Desnona</string>
+    <string name="package_name">cat.alertadesnona.app</string>
+    <string name="custom_url_scheme">cat.alertadesnona.app</string>
+</resources>

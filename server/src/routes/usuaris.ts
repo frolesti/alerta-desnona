@@ -94,3 +94,24 @@ usuariRoutes.put('/:id/push-subscription', (req: Request, res: Response) => {
     res.status(500).json({ ok: false, error: 'Error intern del servidor' });
   }
 });
+
+// PUT /api/usuaris/:id/fcm-token - Guardar token FCM (push natiu Android/iOS)
+usuariRoutes.put('/:id/fcm-token', (req: Request, res: Response) => {
+  try {
+    const db = getDB();
+    const { token } = req.body;
+
+    if (!token) {
+      return res.status(400).json({ ok: false, error: 'Token és obligatori' });
+    }
+
+    db.prepare(`
+      UPDATE usuaris SET fcm_token = ?, notificacions_push = 1 WHERE id = ?
+    `).run(token, req.params.id);
+
+    res.json({ ok: true });
+  } catch (error) {
+    console.error('Error guardant FCM token:', error);
+    res.status(500).json({ ok: false, error: 'Error intern del servidor' });
+  }
+});

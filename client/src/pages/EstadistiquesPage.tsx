@@ -244,13 +244,13 @@ export default function EstadistiquesPage() {
                   </div>
                   <div className="cas-card-body">
                     <div className="cas-location">
-                      <strong>{cas.ciutat}</strong>
+                      <strong>{cas.localitat}</strong>
                       <span>{cas.provincia} &middot; {cas.comunitat_autonoma}</span>
                     </div>
-                    <div className="cas-address">{cas.adreca}</div>
+                    <div className="cas-address">{cas.adreca_original}</div>
                     <div className="cas-meta">
                       {cas.jutjat && <span className="cas-meta-item">{cas.jutjat}</span>}
-                      {cas.entitat_demandant && <span className="cas-meta-item">{cas.entitat_demandant}</span>}
+                      {cas.tipus_be && <span className="cas-meta-item">{cas.tipus_be}</span>}
                     </div>
                   </div>
                 </Link>

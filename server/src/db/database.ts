@@ -150,6 +150,7 @@ function createTables(): void {
       latitud REAL,
       longitud REAL,
       push_subscription TEXT,
+      fcm_token TEXT,
       creat_el TEXT NOT NULL DEFAULT (datetime('now'))
     );
 
@@ -226,6 +227,15 @@ function createTables(): void {
       // Marcar els existents (tots provenen de subhastes BOE) com a ejecucions hipotecàries
       db.exec(`UPDATE desnonaments SET tipus_procediment = 'ejecucion_hipotecaria' WHERE font_oficial LIKE '%Subastas%' OR font_oficial LIKE '%subastas%'`);
       console.log('📦 Migració: columna tipus_procediment afegida');
+    }
+  } catch { /* ja existeix */ }
+
+  // ─── Migració: afegir columna fcm_token a usuaris si no existeix ──
+  try {
+    const cols = db.prepare(`PRAGMA table_info(usuaris)`).all() as Array<{ name: string }>;
+    if (!cols.some(c => c.name === 'fcm_token')) {
+      db.exec(`ALTER TABLE usuaris ADD COLUMN fcm_token TEXT`);
+      console.log('📦 Migració: columna fcm_token afegida a usuaris');
     }
   } catch { /* ja existeix */ }
 

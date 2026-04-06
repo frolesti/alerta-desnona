@@ -9,6 +9,7 @@ import { notificacioRoutes } from './routes/notificacions';
 import { estadistiquesRoutes } from './routes/estadistiques';
 import { startCronJobs } from './services/cron';
 import { initPush, getVapidPublicKey } from './services/push';
+import { initEmail } from './services/email';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -53,6 +54,7 @@ if (process.env.NODE_ENV === 'production') {
 async function main() {
   initDB();
   initPush();
+  initEmail();
   startCronJobs();
 
   app.listen(PORT, () => {
