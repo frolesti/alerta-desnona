@@ -3,6 +3,7 @@ import { getDB } from '../db/database';
 import { v4 as uuid } from 'uuid';
 import { notificarDesnonamentsImminents } from './push';
 import { enviarResumDiari, notificarDesnonamentPerEmail, isEmailConfigured } from './email';
+import { notificarImminentsFCM, isFCMConfigured } from './fcm';
 
 export function startCronJobs(): void {
   // Cada hora: comprovar si hi ha desnonaments que s'apropen (< 48h) i marcar-los com a imminents
@@ -44,6 +45,12 @@ function markImminentDesnonaments(): void {
       notificarDesnonamentsImminents().catch((err) =>
         console.error('Error enviant push notifications:', err)
       );
+      // Enviar FCM push als dispositius natius (Android/iOS)
+      if (isFCMConfigured()) {
+        notificarImminentsFCM().catch((err) =>
+          console.error('Error enviant FCM notifications:', err)
+        );
+      }
       // Enviar emails individuals als usuaris amb notificacions_email activat
       if (isEmailConfigured()) {
         notificarImminentsPerEmail().catch((err) =>

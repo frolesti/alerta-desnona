@@ -10,6 +10,7 @@ import { estadistiquesRoutes } from './routes/estadistiques';
 import { startCronJobs } from './services/cron';
 import { initPush, getVapidPublicKey } from './services/push';
 import { initEmail } from './services/email';
+import { initFCM } from './services/fcm';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -55,6 +56,7 @@ async function main() {
   initDB();
   initPush();
   initEmail();
+  initFCM();
   startCronJobs();
 
   app.listen(PORT, () => {

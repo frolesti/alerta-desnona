@@ -11,7 +11,7 @@ pàgina web (PWA) + app mòbil (Capacitor), amb notificacions push i desplegamen
 - [x] Workflow `daily-update.yml` amb 2 environments (staging + production)
 - [x] Environment secrets documentats a `.env.example`
 - [x] Protection rules documentades (production requereix approval manual)
-- [ ] Environments creats a GitHub → Settings → Environments (manual)
+- [x] Environments creats a GitHub → Settings → Environments
 - [ ] Secrets afegits a cada environment (manual)
 
 ## Fase 1: PWA + Push Notifications
@@ -40,7 +40,7 @@ pàgina web (PWA) + app mòbil (Capacitor), amb notificacions push i desplegamen
 - [x] Template HTML per alerta individual (desnonament imminent)
 - [x] Integrar amb `cron.ts` (resum diari real + emails imminents)
 - [x] Secrets SMTP afegits al workflow i `.env.example`
-- [ ] Configurar compte SMTP real (Gmail App Password o Mailgun) (manual)
+- [x] Configurar compte SMTP real (Gmail App Password)
 - [ ] Provar enviament d'email real (manual)
 
 ## Fase 3: Capacitor (App nativa) + Push natiu
@@ -55,26 +55,34 @@ pàgina web (PWA) + app mòbil (Capacitor), amb notificacions push i desplegamen
 - [x] `PushToggle` unificat (detecta web vs natiu automàticament)
 - [x] Endpoint API `PUT /api/usuaris/:id/fcm-token`
 - [x] Columna `fcm_token` a BD + migració automàtica
-- [ ] Crear projecte Firebase + `google-services.json` (manual)
-- [ ] Integrar `firebase-admin` al servidor per enviar via FCM (Fase 4)
+- [x] Crear projecte Firebase + `google-services.json` copiat
+- [x] Integrar `firebase-admin` al servidor per enviar via FCM (Fase 4)
 - [ ] Compilar APK (requereix Android Studio) (manual)
 - [ ] Compilar iOS (requereix Xcode + Mac) (manual)
 
 ## Fase 4: Firebase Cloud Messaging (servidor)
 > Enviar push natiu des del servidor via FCM.
 
-- [ ] `firebase-admin` al servidor
-- [ ] Enviar push via FCM quan hi ha desnonaments imminents
-- [ ] Unificar push (web-push + FCM) al servei de notificacions
+- [x] `firebase-admin` al servidor
+- [x] Servei FCM complet (`services/fcm.ts`) amb `initFCM()` + `notificarImminentsFCM()`
+- [x] Integrat amb `cron.ts` (web-push + FCM + email en paral·lel)
+- [x] Neteja automàtica de tokens invàlids
+- [ ] Afegir secrets Firebase a GitHub Environments (manual)
+- [ ] Provar push natiu real (manual)
 
 ## Fase 5: Deploy a Producció
 > Servidor real accessible públicament.
 
-- [ ] Escollir plataforma (VPS, Railway, Fly.io...)
-- [ ] Dockerfile
-- [ ] GitHub Actions: deploy automàtic a staging/production
-- [ ] Domini personalitzat + SSL
-- [ ] Migrar de SQLite a PostgreSQL (si escala ho requereix)
+- [x] Dockerfile multi-stage (client-build → server-build → production)
+- [x] `.dockerignore` per builds eficients
+- [x] `docker-compose.yml` amb volum persistent per la BD
+- [x] GitHub Actions `deploy.yml` (build + push a GHCR)
+- [x] Opcions de deploy comentades: Railway, Fly.io, SSH/VPS
+- [x] `VITE_API_URL` env var per builds Capacitor/staging
+- [x] Type declarations (`vite-env.d.ts`)
+- [ ] Escollir plataforma (Railway, Fly.io, VPS...) (manual)
+- [ ] Configurar deploy real + domini + SSL (manual)
+- [ ] Migrar de SQLite a PostgreSQL (si escala ho requereix, futur)
 
 ---
 
@@ -96,5 +104,7 @@ pàgina web (PWA) + app mòbil (Capacitor), amb notificacions push i desplegamen
 | `FIREBASE_PROJECT_ID` | ❌ | ✅ | Fase 4 |
 | `FIREBASE_PRIVATE_KEY` | ❌ | ✅ | Fase 4 |
 | `FIREBASE_CLIENT_EMAIL` | ❌ | ✅ | Fase 4 |
-| `DEPLOY_HOST` | ✅ | ✅ | Fase 5 |
-| `DEPLOY_SSH_KEY` | ✅ | ✅ | Fase 5 |
+| `DEPLOY_HOST` | ✅ | ✅ | Fase 5 (SSH) |
+| `DEPLOY_SSH_KEY` | ✅ | ✅ | Fase 5 (SSH) |
+| `RAILWAY_TOKEN` | ❌ | ✅ | Fase 5 (Railway) |
+| `FLY_API_TOKEN` | ❌ | ✅ | Fase 5 (Fly.io) |

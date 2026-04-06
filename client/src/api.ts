@@ -1,4 +1,8 @@
-const API_BASE = '/api';
+// En producció web (mateixa origin): /api
+// En Capacitor natiu o staging: URL absoluta via VITE_API_URL
+const API_BASE = import.meta.env.VITE_API_URL
+  ? `${import.meta.env.VITE_API_URL}/api`
+  : '/api';
 
 async function fetchJSON<T>(url: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE}${url}`, {

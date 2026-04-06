@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "967999232723",
+    "project_id": "alerta-desnona",
+    "storage_bucket": "alerta-desnona.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:967999232723:android:4111776b416558bcb9d226",
+        "android_client_info": {
+          "package_name": "com.frolesti.alerta_desnona"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyABMzVXHlsfdRRqgVhwV8yuL160kS5jTU4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

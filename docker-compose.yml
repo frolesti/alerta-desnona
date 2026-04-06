@@ -1,0 +1,27 @@
+# docker-compose.yml — Alerta Desnona
+#
+# Ús local:   docker compose up --build
+# Producció:  docker compose -f docker-compose.yml up -d
+#
+# Crea un fitxer .env al directori arrel amb els secrets necessaris.
+
+services:
+  app:
+    build: .
+    container_name: alerta-desnona
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3001}:3001"
+    volumes:
+      # Persistir la base de dades SQLite fora del contenidor
+      - alerta-data:/app/data
+    env_file:
+      - server/.env
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - DB_PATH=/app/data/alerta-desnona.db
+
+volumes:
+  alerta-data:
+    driver: local
