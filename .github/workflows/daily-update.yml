@@ -7,11 +7,15 @@
 #   4. Geocode (coordenades per ciutat)
 #   5. INE (estadistiques, dilluns)
 #   6. Marcar imminents (<48h)
+#   7. Enviar notificacions push als usuaris subscrits
 #
-# Secrets necessaris a GitHub > Settings > Secrets > Actions:
-#   - AI_BASE_URL
-#   - AI_MODEL
-#   - OPENAI_API_KEY
+# Environments a GitHub > Settings > Environments:
+#   - staging:    sense protection rules, per provar
+#   - production: protection rule "Required reviewers" recomanada
+#
+# Secrets (per environment, NO repository):
+#   - AI_BASE_URL, AI_MODEL, OPENAI_API_KEY
+#   - VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, VAPID_EMAIL
 
 name: Actualitzacio diaria
 
@@ -23,6 +27,14 @@ on:
   # Permet execucio manual des de GitHub > Actions > Run workflow
   workflow_dispatch:
     inputs:
+      environment:
+        description: "Environment on executar"
+        required: true
+        default: "production"
+        type: choice
+        options:
+          - staging
+          - production
       skip_ine:
         description: "Saltar fase INE?"
         required: false
@@ -34,9 +46,9 @@ on:
         default: false
         type: boolean
 
-# Evita execucions simultànies de la mateixa pipeline
+# Evita execucions simultanees de la mateixa pipeline
 concurrency:
-  group: daily-update
+  group: daily-update-${{ github.event.inputs.environment || 'production' }}
   cancel-in-progress: false
 
 permissions:
@@ -44,15 +56,22 @@ permissions:
 
 jobs:
   update:
-    name: Pipeline actualitzacio
+    name: "Pipeline [${{ github.event.inputs.environment || 'production' }}]"
     runs-on: ubuntu-latest
     timeout-minutes: 60
+
+    # Environment: manual dispatch usa l'input, cron sempre usa production
+    environment: ${{ github.event.inputs.environment || 'production' }}
 
     env:
       AI_BASE_URL: ${{ secrets.AI_BASE_URL }}
       AI_MODEL: ${{ secrets.AI_MODEL }}
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      VAPID_PUBLIC_KEY: ${{ secrets.VAPID_PUBLIC_KEY }}
+      VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+      VAPID_EMAIL: ${{ secrets.VAPID_EMAIL }}
       DB_PATH: ${{ github.workspace }}/server/data/alerta-desnona.db
+      NODE_ENV: ${{ github.event.inputs.environment || 'production' }}
 
     steps:
       # 1. Checkout del codi
@@ -67,28 +86,26 @@ jobs:
           cache: "npm"
           cache-dependency-path: server/package-lock.json
 
-      # 3. Restaurar base de dades (cache persistent)
+      # 3. Restaurar base de dades (cache persistent, separat per environment)
       - name: "Restaurar base de dades SQLite"
         id: cache-db
         uses: actions/cache@v4
         with:
           path: server/data/alerta-desnona.db
-          # Clau fixa - sempre actualitza el mateix cache
-          key: alerta-desnona-db
-          # Fallback
+          key: alerta-desnona-db-${{ github.event.inputs.environment || 'production' }}
           restore-keys: |
-            alerta-desnona-db
+            alerta-desnona-db-${{ github.event.inputs.environment || 'production' }}
 
       - name: "Crear directori de dades"
         run: mkdir -p server/data
 
       # 4. Instal-lar dependencies
-      - name: "Instal·lar dependències del servidor"
+      - name: "Instal-lar dependencies del servidor"
         working-directory: server
         run: npm ci
 
       # 5. Executar pipeline
-      - name: "Executar actualització diària"
+      - name: "Executar actualitzacio diaria"
         working-directory: server
         run: |
           ARGS=""
@@ -105,18 +122,19 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: "alerta-desnona-db-${{ github.run_number }}"
+          name: "alerta-desnona-db-${{ github.event.inputs.environment || 'production' }}-${{ github.run_number }}"
           path: server/data/alerta-desnona.db
           retention-days: 30
           if-no-files-found: warn
 
       # 7. Resum al log
-      - name: "Resum de l'execució"
+      - name: "Resum de l'execucio"
         if: always()
         working-directory: server
         run: |
-          echo "## Resum de l'actualització" >> $GITHUB_STEP_SUMMARY
+          echo "## Resum de l'actualitzacio" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Environment**: ${{ github.event.inputs.environment || 'production' }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Data**: $(date -u '+%Y-%m-%d %H:%M UTC')" >> $GITHUB_STEP_SUMMARY
           echo "- **Trigger**: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
           if [ -f "data/alerta-desnona.db" ]; then
@@ -124,4 +142,4 @@ jobs:
             echo "- **Mida BD**: $SIZE" >> $GITHUB_STEP_SUMMARY
           fi
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Base de dades guardada com a artefacte \`alerta-desnona-db-${{ github.run_number }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "Base de dades guardada com a artefacte \`alerta-desnona-db-${{ github.event.inputs.environment || 'production' }}-${{ github.run_number }}\`" >> $GITHUB_STEP_SUMMARY
