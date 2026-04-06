@@ -157,6 +157,8 @@ const ca = {
   alertes_error: 'Error al registrar-se',
   alertes_submit: '🔔 Activa les alertes',
   alertes_submitting: 'Registrant...',
+  alertes_push_title: 'Notificacions push',
+  alertes_push_desc: 'Rep alertes instantànies al mòbil o ordinador quan hi hagi desnonaments imminents a les teves zones.',
 
   // === Info ===
   info_title: 'Sobre Alerta Desnona',
@@ -528,6 +530,8 @@ const es: TranslationDict = {
   alertes_error: 'Error al registrarse',
   alertes_submit: '🔔 Activar alertas',
   alertes_submitting: 'Registrando...',
+  alertes_push_title: 'Notificaciones push',
+  alertes_push_desc: 'Recibe alertas instantáneas en el móvil u ordenador cuando haya desahucios inminentes en tus zonas.',
 
   info_title: 'Sobre Alerta Desnona',
   info_subtitle: 'Plataforma de seguimiento y alerta de desahucios en todo el Estado español',
@@ -893,6 +897,8 @@ const gl: TranslationDict = {
   alertes_error: 'Erro ao rexistrarse',
   alertes_submit: '🔔 Activar alertas',
   alertes_submitting: 'Rexistrando...',
+  alertes_push_title: 'Notificacións push',
+  alertes_push_desc: 'Recibe alertas instantáneas no móbil ou ordenador cando haxa desafiuzamentos inminentes nas túas zonas.',
 
   info_title: 'Sobre Alerta Desnona',
   info_subtitle: 'Plataforma de seguimento e alerta de desafiuzamentos en todo o Estado español',
@@ -1258,6 +1264,8 @@ const eu: TranslationDict = {
   alertes_error: 'Errorea erregistratzean',
   alertes_submit: '🔔 Alertak aktibatu',
   alertes_submitting: 'Erregistratzen...',
+  alertes_push_title: 'Push jakinarazpenak',
+  alertes_push_desc: 'Jaso berehalako alertak mugikorrean edo ordenagailuan zure eremuetan etxegabetze gertuak daudenean.',
 
   info_title: 'Alerta Desnona-ri buruz',
   info_subtitle: 'Estatu espainiar osoko etxegabetzeen jarraipen eta alerta plataforma',

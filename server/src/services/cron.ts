@@ -1,6 +1,7 @@
 import cron from 'node-cron';
 import { getDB } from '../db/database';
 import { v4 as uuid } from 'uuid';
+import { notificarDesnonamentsImminents } from './push';
 
 export function startCronJobs(): void {
   // Cada hora: comprovar si hi ha desnonaments que s'apropen (< 48h) i marcar-los com a imminents
@@ -38,6 +39,10 @@ function markImminentDesnonaments(): void {
     if (result.changes > 0) {
       console.log(`  → ${result.changes} desnonaments marcats com a imminents`);
       createNotificationsForImminent();
+      // Enviar push notifications reals als usuaris subscrits
+      notificarDesnonamentsImminents().catch((err) =>
+        console.error('Error enviant push notifications:', err)
+      );
     }
   } catch (error) {
     console.error('Error marcant desnonaments imminents:', error);

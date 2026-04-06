@@ -3003,3 +3003,110 @@ a:hover {
 [data-theme="light"] .map-mode-toggle button:hover:not(.active) {
   background: rgba(0, 0, 0, 0.06);
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   Push Notifications Toggle
+   ═══════════════════════════════════════════════════════════════ */
+
+.push-section {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--border);
+}
+
+.push-section__title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.push-section__desc {
+  font-size: 0.9rem;
+  opacity: 0.7;
+  margin-bottom: 1rem;
+}
+
+.push-toggle {
+  padding: 1rem;
+  border-radius: 12px;
+  background: var(--bg-secondary, rgba(255, 255, 255, 0.05));
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.1));
+}
+
+.push-toggle--unsupported,
+.push-toggle--denied {
+  opacity: 0.6;
+}
+
+.push-toggle__row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.push-toggle__icon {
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+
+.push-toggle__text {
+  flex: 1;
+  font-size: 0.9rem;
+}
+
+.push-toggle__btn {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--accent, #863bff);
+  background: transparent;
+  color: var(--accent, #863bff);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.push-toggle__btn:hover:not(:disabled) {
+  background: var(--accent, #863bff);
+  color: white;
+}
+
+.push-toggle__btn--active {
+  background: var(--accent, #863bff);
+  color: white;
+}
+
+.push-toggle__btn--active:hover:not(:disabled) {
+  background: transparent;
+  color: var(--accent, #863bff);
+}
+
+.push-toggle__btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.push-toggle__spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: push-spin 0.7s linear infinite;
+}
+
+@keyframes push-spin {
+  to { transform: rotate(360deg); }
+}
+
+.push-toggle__error {
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--danger, #ef4444);
+}
+
+[data-theme="light"] .push-toggle {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.08);
+}

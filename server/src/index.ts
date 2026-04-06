@@ -8,6 +8,7 @@ import { usuariRoutes } from './routes/usuaris';
 import { notificacioRoutes } from './routes/notificacions';
 import { estadistiquesRoutes } from './routes/estadistiques';
 import { startCronJobs } from './services/cron';
+import { initPush, getVapidPublicKey } from './services/push';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -30,6 +31,15 @@ app.get('/api/health', (_req, res) => {
   res.json({ ok: true, timestamp: new Date().toISOString() });
 });
 
+// VAPID public key (el client la necessita per subscriure's a push)
+app.get('/api/push/vapid-key', (_req, res) => {
+  const key = getVapidPublicKey();
+  if (!key) {
+    return res.status(503).json({ ok: false, error: 'Push no configurat' });
+  }
+  res.json({ ok: true, data: { publicKey: key } });
+});
+
 // Serve static client in production
 if (process.env.NODE_ENV === 'production') {
   const clientDist = path.join(__dirname, '../../client/dist');
@@ -42,6 +52,7 @@ if (process.env.NODE_ENV === 'production') {
 // Initialize
 async function main() {
   initDB();
+  initPush();
   startCronJobs();
 
   app.listen(PORT, () => {

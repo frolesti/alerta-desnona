@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { registrarUsuari } from '../api'
 import { useTranslation } from '../i18n/LanguageContext'
+import PushToggle from '../components/PushToggle'
 
 const COMUNITATS_AUTONOMES: Record<string, string[]> = {
   'Andalucía': ['Almería', 'Cádiz', 'Córdoba', 'Granada', 'Huelva', 'Jaén', 'Málaga', 'Sevilla'],
@@ -32,6 +33,9 @@ export default function AlertesPage() {
   const [provinciesSeleccionades, setProvinciesSeleccionades] = useState<string[]>([])
   const [submitting, setSubmitting] = useState(false)
   const [result, setResult] = useState<{ type: 'success' | 'error'; msg: string } | null>(null)
+  const [registeredUserId, setRegisteredUserId] = useState<string | undefined>(
+    () => localStorage.getItem('alerta-desnona-user-id') || undefined
+  )
 
   function toggleComunitat(comunitat: string) {
     setComunitatsSeleccionades(prev =>
@@ -66,6 +70,11 @@ export default function AlertesPage() {
       })
 
       if (res.ok) {
+        const userId = res.data?.id
+        if (userId) {
+          localStorage.setItem('alerta-desnona-user-id', userId)
+          setRegisteredUserId(userId)
+        }
         setResult({
           type: 'success',
           msg: t('alertes_success'),
@@ -182,6 +191,15 @@ export default function AlertesPage() {
           {submitting ? t('alertes_submitting') : t('alertes_submit')}
         </button>
       </form>
+
+      {/* Notificacions Push — visible després de registrar-se o si ja s'ha registrat */}
+      {registeredUserId && (
+        <div className="push-section">
+          <h2 className="push-section__title">{t('alertes_push_title')}</h2>
+          <p className="push-section__desc">{t('alertes_push_desc')}</p>
+          <PushToggle userId={registeredUserId} />
+        </div>
+      )}
     </div>
   )
 }

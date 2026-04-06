@@ -157,7 +157,7 @@ export function registrarUsuari(data: {
   provincies?: string[];
   notificacions_email?: boolean;
 }) {
-  return fetchJSON<ApiResponse<unknown>>('/usuaris/registre', {
+  return fetchJSON<ApiResponse<{ id: string; email: string }>>('/usuaris/registre', {
     method: 'POST',
     body: JSON.stringify(data),
   });
