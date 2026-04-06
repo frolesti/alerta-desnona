@@ -1,0 +1,127 @@
+# Alerta Desnona - Actualitzacio diaria automatitzada
+#
+# Pipeline completa cada dia a les 06:00 UTC:
+#   1. Scrape BOE (subhastes judicials)
+#   2. Scrape TEU (edictes de desnonaments: impagaments + ocupacio)
+#   3. Parse IA (normalitzar adreces amb Gemini)
+#   4. Geocode (coordenades per ciutat)
+#   5. INE (estadistiques, dilluns)
+#   6. Marcar imminents (<48h)
+#
+# Secrets necessaris a GitHub > Settings > Secrets > Actions:
+#   - AI_BASE_URL
+#   - AI_MODEL
+#   - OPENAI_API_KEY
+
+name: Actualitzacio diaria
+
+on:
+  schedule:
+    # Cada dia a les 06:00 UTC (08:00 hora d'Espanya a l'estiu)
+    - cron: "0 6 * * *"
+
+  # Permet execucio manual des de GitHub > Actions > Run workflow
+  workflow_dispatch:
+    inputs:
+      skip_ine:
+        description: "Saltar fase INE?"
+        required: false
+        default: false
+        type: boolean
+      dry_run:
+        description: "Mode dry run (no fa canvis)?"
+        required: false
+        default: false
+        type: boolean
+
+# Evita execucions simultànies de la mateixa pipeline
+concurrency:
+  group: daily-update
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  update:
+    name: Pipeline actualitzacio
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    env:
+      AI_BASE_URL: ${{ secrets.AI_BASE_URL }}
+      AI_MODEL: ${{ secrets.AI_MODEL }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      DB_PATH: ${{ github.workspace }}/server/data/alerta-desnona.db
+
+    steps:
+      # 1. Checkout del codi
+      - name: "Checkout repositori"
+        uses: actions/checkout@v4
+
+      # 2. Configurar Node.js
+      - name: "Configurar Node.js"
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: server/package-lock.json
+
+      # 3. Restaurar base de dades (cache persistent)
+      - name: "Restaurar base de dades SQLite"
+        id: cache-db
+        uses: actions/cache@v4
+        with:
+          path: server/data/alerta-desnona.db
+          # Clau fixa - sempre actualitza el mateix cache
+          key: alerta-desnona-db
+          # Fallback
+          restore-keys: |
+            alerta-desnona-db
+
+      - name: "Crear directori de dades"
+        run: mkdir -p server/data
+
+      # 4. Instal-lar dependencies
+      - name: "Instal·lar dependències del servidor"
+        working-directory: server
+        run: npm ci
+
+      # 5. Executar pipeline
+      - name: "Executar actualització diària"
+        working-directory: server
+        run: |
+          ARGS=""
+          if [ "${{ github.event.inputs.skip_ine }}" = "true" ]; then
+            ARGS="$ARGS --skip-ine"
+          fi
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            ARGS="$ARGS --dry-run"
+          fi
+          npx tsx src/daily-update.ts $ARGS
+
+      # 6. Guardar DB com a artefacte (backup)
+      - name: "Guardar base de dades com a artefacte"
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: "alerta-desnona-db-${{ github.run_number }}"
+          path: server/data/alerta-desnona.db
+          retention-days: 30
+          if-no-files-found: warn
+
+      # 7. Resum al log
+      - name: "Resum de l'execució"
+        if: always()
+        working-directory: server
+        run: |
+          echo "## Resum de l'actualització" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Data**: $(date -u '+%Y-%m-%d %H:%M UTC')" >> $GITHUB_STEP_SUMMARY
+          echo "- **Trigger**: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          if [ -f "data/alerta-desnona.db" ]; then
+            SIZE=$(du -h data/alerta-desnona.db | cut -f1)
+            echo "- **Mida BD**: $SIZE" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Base de dades guardada com a artefacte \`alerta-desnona-db-${{ github.run_number }}\`" >> $GITHUB_STEP_SUMMARY
