@@ -68,7 +68,7 @@ function createTables(): void {
     );
 
     -- ─── Desnonaments (casos) ─────────────────────────────────────
-    -- Cada cas de subhasta judicial referencia una adreça.
+    -- Cada cas de subhasta judicial o edicte de desnonament.
     CREATE TABLE IF NOT EXISTS desnonaments (
       id TEXT PRIMARY KEY,
       adreca_id TEXT NOT NULL,
@@ -78,6 +78,14 @@ function createTables(): void {
       data_desnonament TEXT NOT NULL,
       hora_desnonament TEXT,
       estat TEXT NOT NULL DEFAULT 'programat',
+
+      -- Tipus de procediment (cobertura completa)
+      -- ejecucion_hipotecaria: subhasta judicial per impagament d'hipoteca
+      -- impago_alquiler:       desnonament per impagament de lloguer
+      -- ocupacion:             desnonament per ocupació il·legal
+      -- cautelar:              mesura cautelar / precari
+      -- desconegut:            tipus no determinat
+      tipus_procediment TEXT NOT NULL DEFAULT 'desconegut',
 
       -- Dades de la subhasta (directes del BOE, en castellà — idioma oficial)
       tipus_subhasta TEXT,         -- "JUDICIAL EN VÍA DE APREMIO", "NOTARIAL"...
@@ -100,7 +108,7 @@ function createTables(): void {
       jutjat_email TEXT,
 
       -- Procediment
-      num_procediment TEXT,        -- "BOE-B-2024-17346"
+      num_procediment TEXT,        -- "BOE-B-2024-17346" o "TEU-A-2026-12345"
       expedient TEXT,              -- "0946/2024"
 
       -- Fonts
@@ -208,4 +216,19 @@ function createTables(): void {
     CREATE INDEX IF NOT EXISTS idx_estadistiques_provincia ON estadistiques_ine(codi_provincia, any);
     CREATE INDEX IF NOT EXISTS idx_estadistiques_comunitat ON estadistiques_ine(comunitat_autonoma, any);
   `);
+
+  // ─── Migració: afegir columna tipus_procediment si no existeix ──
+  // (per bases de dades ja existents)
+  try {
+    const cols = db.prepare(`PRAGMA table_info(desnonaments)`).all() as Array<{ name: string }>;
+    if (!cols.some(c => c.name === 'tipus_procediment')) {
+      db.exec(`ALTER TABLE desnonaments ADD COLUMN tipus_procediment TEXT NOT NULL DEFAULT 'desconegut'`);
+      // Marcar els existents (tots provenen de subhastes BOE) com a ejecucions hipotecàries
+      db.exec(`UPDATE desnonaments SET tipus_procediment = 'ejecucion_hipotecaria' WHERE font_oficial LIKE '%Subastas%' OR font_oficial LIKE '%subastas%'`);
+      console.log('📦 Migració: columna tipus_procediment afegida');
+    }
+  } catch { /* ja existeix */ }
+
+  // Índex que depèn de la migració (s'executa després)
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_desnonaments_tipus ON desnonaments(tipus_procediment)`);
 }

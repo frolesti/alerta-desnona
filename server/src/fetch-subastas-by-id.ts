@@ -510,17 +510,19 @@ function upsertSubasta(db: any, data: SubastaData): 'inserted' | 'updated' | 'sk
     INSERT INTO desnonaments (
       id, adreca_id, boe_id,
       data_desnonament, hora_desnonament, estat,
+      tipus_procediment,
       tipus_subhasta, tipus_be, vivenda_habitual,
       quantitat_reclamada, valor_subhasta,
       idufir, inscripcio_registral, descripcio,
       jutjat, jutjat_adreca, jutjat_telefon, jutjat_email,
       num_procediment, expedient,
       font_oficial, url_font, document_url
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ON CONFLICT(boe_id) DO UPDATE SET
       data_desnonament=excluded.data_desnonament,
       hora_desnonament=excluded.hora_desnonament,
       estat=excluded.estat,
+      tipus_procediment=excluded.tipus_procediment,
       tipus_subhasta=excluded.tipus_subhasta,
       tipus_be=excluded.tipus_be,
       vivenda_habitual=excluded.vivenda_habitual,
@@ -544,6 +546,7 @@ function upsertSubasta(db: any, data: SubastaData): 'inserted' | 'updated' | 'sk
   const result = stmt.run(
     id, adrecaId, data.boeId,
     dataDesn, data.horaFi || null, estatApp,
+    'ejecucion_hipotecaria',  // Subhastes BOE = sempre execucions hipotecàries
     data.tipusSubasta || null, data.tipusBe || null, data.vivendaHabitual ? 1 : 0,
     data.quantitatReclamada || null, data.valorSubasta || null,
     data.idufir || null, data.inscripcioRegistral || null,

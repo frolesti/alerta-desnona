@@ -10,6 +10,8 @@
     "update": "tsx src/daily-update.ts",
     "update:dry": "tsx src/daily-update.ts --dry-run",
     "scrape": "tsx src/fetch-subastas-by-id.ts",
+    "scrape:teu": "tsx src/fetch-teu-desnonaments.ts",
+    "scrape:teu:week": "tsx src/fetch-teu-desnonaments.ts --days 7",
     "parse": "tsx src/bulk-parse-adreces.ts",
     "geocode": "tsx src/geocode-per-ciutat.ts",
     "fetch-ine": "tsx src/fetch-ine.ts"

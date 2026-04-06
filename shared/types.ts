@@ -23,7 +23,7 @@ export interface Adreca {
   refCatastral: string | null;
 }
 
-// ─── Desnonament (cas de subhasta) ───────────────────────────────
+// ─── Desnonament (cas de subhasta o edicte judicial) ─────────────
 
 export interface Desnonament {
   id: string;
@@ -33,6 +33,9 @@ export interface Desnonament {
   dataDesnonament: string; // ISO date
   horaDesnonament?: string;
   estat: EstatDesnonament;
+
+  // Tipus de procediment
+  tipusProcediment: TipusProcediment;
 
   // Dades de la subhasta
   tipusSubhasta?: string;
@@ -80,6 +83,16 @@ export const EstatDesnonament = {
   NEGOCIAT: 'negociat',
 } as const;
 export type EstatDesnonament = (typeof EstatDesnonament)[keyof typeof EstatDesnonament];
+
+// Tipus de procediment — cobertura completa
+export const TipusProcediment = {
+  EJECUCION_HIPOTECARIA: 'ejecucion_hipotecaria',
+  IMPAGO_ALQUILER: 'impago_alquiler',
+  OCUPACION: 'ocupacion',
+  CAUTELAR: 'cautelar',
+  DESCONEGUT: 'desconegut',
+} as const;
+export type TipusProcediment = (typeof TipusProcediment)[keyof typeof TipusProcediment];
 
 export interface Historial {
   id: string;
@@ -195,6 +208,7 @@ export interface FiltresDesnonament {
   comunitatAutonoma?: string;
   provincia?: string;
   estat?: EstatDesnonament;
+  tipusProcediment?: TipusProcediment;
   dataInici?: string;
   dataFi?: string;
   cerca?: string;

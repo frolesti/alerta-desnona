@@ -23,6 +23,7 @@ desnonamentRoutes.get('/', (req: Request, res: Response) => {
     const db = getDB();
     const {
       comunitat_autonoma, provincia, estat,
+      tipus_procediment,
       data_inici, data_fi, cerca,
       pagina = '1', limit = '50',
       sort_by, sort_dir,
@@ -42,6 +43,10 @@ desnonamentRoutes.get('/', (req: Request, res: Response) => {
     if (estat) {
       baseWhere += ' AND d.estat = ?';
       params.push(estat);
+    }
+    if (tipus_procediment) {
+      baseWhere += ' AND d.tipus_procediment = ?';
+      params.push(tipus_procediment);
     }
     if (data_inici) {
       baseWhere += ' AND d.data_desnonament >= ?';
