@@ -38,12 +38,10 @@ on:
       skip_ine:
         description: "Saltar fase INE?"
         required: false
-        default: false
         type: boolean
       dry_run:
         description: "Mode dry run (no fa canvis)?"
         required: false
-        default: false
         type: boolean
 
 # Evita execucions simultanees de la mateixa pipeline

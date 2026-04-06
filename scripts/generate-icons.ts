@@ -12,8 +12,12 @@
  */
 
 import sharp from 'sharp';
+import { fileURLToPath } from 'url';
 import path from 'path';
 import fs from 'fs';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const SVG_PATH = path.join(__dirname, '../client/public/favicon.svg');
 const OUT_DIR = path.join(__dirname, '../client/public/icons');

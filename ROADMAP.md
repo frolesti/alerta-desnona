@@ -19,7 +19,7 @@ app mòbil + web desktop, amb notificacions push i desplegament automatitzat.
 
 - [x] `manifest.json` amb icones, colors i configuració PWA
 - [x] Service Worker amb precaching i estratègia network-first
-- [x] `vite-plugin-pwa` integrat a la configuració de Vite
+- [x] Registre de SW a `main.tsx` (vanilla, sense `vite-plugin-pwa`)
 - [x] Meta tags PWA a `index.html` (apple-touch-icon, theme-color...)
 - [x] Registre de Service Worker al client (`registerSW`)
 - [x] Servei VAPID push al servidor (`services/push.ts`)
@@ -27,7 +27,8 @@ app mòbil + web desktop, amb notificacions push i desplegament automatitzat.
 - [x] Client: hook `usePushNotifications` per subscripció/dessubscripció
 - [x] Component UI per activar/desactivar notificacions
 - [x] Integració cron.ts amb push real (substituir placeholder)
-- [ ] Generar VAPID keys reals i afegir a secrets (manual)
+- [x] Generar VAPID keys reals i afegir a `.env` local
+- [ ] Afegir VAPID secrets a GitHub Environments (manual)
 - [ ] Provar instal·lació PWA al mòbil (manual)
 - [ ] Provar notificació push real (manual)
 
