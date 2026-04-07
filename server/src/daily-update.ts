@@ -31,6 +31,7 @@ import 'dotenv/config';
 import { initDB, getDB } from './db/database';
 import { execSync } from 'child_process';
 import path from 'path';
+import fs from 'fs';
 
 const args = process.argv.slice(2);
 const DRY_RUN = args.includes('--dry-run');
@@ -38,6 +39,31 @@ const SKIP_INE = args.includes('--skip-ine');
 const SKIP_TEU = args.includes('--skip-teu');
 
 const serverDir = path.resolve(__dirname, '..');
+
+// Detect if running in production (compiled JS) or development (tsx)
+const IS_PRODUCTION = __filename.endsWith('.js') && fs.existsSync(path.join(serverDir, 'dist'));
+
+/**
+ * Build the command to run a sub-script.
+ * In production: `node dist/server/src/<script>.js`
+ * In development: `npx tsx src/<script>.ts`
+ */
+function buildCommand(scriptName: string, extraArgs: string = ''): string {
+  if (IS_PRODUCTION) {
+    // In production Docker image, compiled JS files are at dist/server/src/
+    const jsPath = path.join(serverDir, 'dist', 'server', 'src', `${scriptName}.js`);
+    if (!fs.existsSync(jsPath)) {
+      // Fallback: might be at dist/src/ depending on build config
+      const altPath = path.join(serverDir, 'dist', 'src', `${scriptName}.js`);
+      if (fs.existsSync(altPath)) {
+        return `node ${altPath}${extraArgs ? ' ' + extraArgs : ''}`;
+      }
+      console.warn(`⚠️  Script no trobat: ${jsPath} ni ${altPath}`);
+    }
+    return `node ${jsPath}${extraArgs ? ' ' + extraArgs : ''}`;
+  }
+  return `npx tsx src/${scriptName}.ts${extraArgs ? ' ' + extraArgs : ''}`;
+}
 
 function runStep(label: string, command: string): boolean {
   console.log(`\n${'═'.repeat(60)}`);
@@ -156,14 +182,14 @@ async function main() {
   const currentYear = today.getFullYear();
   runStep(
     'Fase 1: Scrape BOE — subhastes judicials (exec. hipotecàries)',
-    `npx tsx src/fetch-subastas-by-id.ts --year ${currentYear} --prefix ALL`,
+    buildCommand('fetch-subastas-by-id', `--year ${currentYear} --prefix ALL`),
   );
 
   // ── Fase 2: Scrape TEU — edictes de desnonaments (impagaments + ocupació) ──
   if (!SKIP_TEU) {
     runStep(
       'Fase 2: Scrape TEU — edictes desnonaments (impago + ocupació)',
-      'npx tsx src/fetch-teu-desnonaments.ts --days 1',
+      buildCommand('fetch-teu-desnonaments', '--days 1'),
     );
   } else {
     console.log('\n⏭️  Fase 2: TEU — omesa per --skip-teu');
@@ -172,20 +198,20 @@ async function main() {
   // ── Fase 3: Parse adreces amb IA ──
   runStep(
     'Fase 3: Parsejar adreces noves amb Gemini',
-    'npx tsx src/bulk-parse-adreces.ts',
+    buildCommand('bulk-parse-adreces'),
   );
 
   // ── Fase 4: Geocodificar adreces noves ──
   runStep(
     'Fase 4: Geocodificar adreces noves',
-    'npx tsx src/geocode-per-ciutat.ts',
+    buildCommand('geocode-per-ciutat'),
   );
 
   // ── Fase 5: INE (només dilluns) ──
   if (!SKIP_INE && dayOfWeek === 1) {
     runStep(
       'Fase 5: Actualitzar estadístiques INE (setmanal)',
-      'npx tsx src/fetch-ine.ts',
+      buildCommand('fetch-ine'),
     );
   } else if (!SKIP_INE) {
     console.log(`\n⏭️  Fase 5: INE — s'executa només els dilluns (avui és ${['dg', 'dl', 'dm', 'dc', 'dj', 'dv', 'ds'][dayOfWeek]})`);
