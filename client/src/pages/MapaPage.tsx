@@ -257,31 +257,22 @@ export default function MapaPage() {
         )}
       </div>
 
-      {/* Toggle button when panel hidden */}
-      {!panelVisible && (
-        <button
-          className="panel-toggle-btn"
-          onClick={() => setPanelVisible(true)}
-          title={t('popup_toggle_panel')}
-        >
-          📊
-        </button>
-      )}
+      {/* Chevron tab — always visible, toggles panel */}
+      <button
+        className={`panel-chevron-tab ${panelVisible ? 'open' : 'closed'}`}
+        onClick={() => setPanelVisible(v => !v)}
+        title={panelVisible ? t('popup_hide_panel') : t('popup_toggle_panel')}
+        aria-label={panelVisible ? t('popup_hide_panel') : t('popup_toggle_panel')}
+      >
+        <svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M8 2L2 8L8 14" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </button>
 
       {/* Stats overlay */}
-      {panelVisible && (
-      <div className="mapa-overlay">
+      <div className={`mapa-overlay ${panelVisible ? '' : 'collapsed'}`}>
         <div className="stats-panel">
-          <div className="stats-panel-header">
-            <h2>{t('map_title')}</h2>
-            <button
-              className="panel-close-btn"
-              onClick={() => setPanelVisible(false)}
-              title={t('popup_hide_panel')}
-            >
-              ✕
-            </button>
-          </div>
+          <h2>{t('map_title')}</h2>
 
           {/* Estat filter */}
           <div className="map-estat-filter">
@@ -344,7 +335,6 @@ export default function MapaPage() {
           </Link>
         </div>
       </div>
-      )}
     </div>
   )
 }

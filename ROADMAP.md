@@ -82,15 +82,18 @@ pàgina web (PWA) + app mòbil (Capacitor), amb notificacions push i desplegamen
 - [x] Type declarations (`vite-env.d.ts`)
 - [x] Deploy a Railway (Free tier) amb domini públic
 - [x] Volum persistent per SQLite (/app/data)
-- [x] 17 variables d'entorn configurades
+- [x] 17 variables d'entorn configurades a Railway
 - [x] BD poblada amb 10.883 casos + 624 INE
 - [x] `daily-update.ts` compatible amb producció (node dist/ vs npx tsx)
+- [x] Auto-deploy activat (push a `main` → Railway redeploy automàtic)
 - [ ] Migrar de SQLite a PostgreSQL (si escala ho requereix, futur)
 - [ ] Configurar domini personalitzat (futur)
 
 ---
 
 ## Secrets per Environment
+
+### GitHub Actions (staging / production)
 
 | Secret | Staging | Production | Necessari des de |
 |--------|---------|------------|------------------|
@@ -112,3 +115,30 @@ pàgina web (PWA) + app mòbil (Capacitor), amb notificacions push i desplegamen
 | `DEPLOY_SSH_KEY` | ✅ | ✅ | Fase 5 (SSH) |
 | `RAILWAY_TOKEN` | ❌ | ✅ | Fase 5 (Railway) |
 | `FLY_API_TOKEN` | ❌ | ✅ | Fase 5 (Fly.io) |
+
+### Railway — Variables d'entorn (producció)
+
+| Variable | Valor / Descripció | Servei |
+|----------|-------------------|--------|
+| `PORT` | `3001` | Express |
+| `DB_PATH` | `/app/data/alerta-desnona.db` | SQLite (volum persistent) |
+| `CLIENT_URL` | `https://alerta-desnona-production.up.railway.app` | Emails / CORS |
+| `NODE_ENV` | `production` | General |
+| `AI_BASE_URL` | URL del proveïdor d'IA | Geocodificació (adreca.ts) |
+| `AI_MODEL` | Model IA (e.g. `gpt-4o-mini`) | Geocodificació |
+| `OPENAI_API_KEY` | Clau API OpenAI/compatible | Geocodificació |
+| `VAPID_PUBLIC_KEY` | Clau pública VAPID | Web Push |
+| `VAPID_PRIVATE_KEY` | Clau privada VAPID | Web Push |
+| `VAPID_EMAIL` | Email contacte VAPID | Web Push |
+| `SMTP_HOST` | Servidor SMTP (e.g. `smtp.gmail.com`) | Email |
+| `SMTP_PORT` | Port SMTP (e.g. `587`) | Email |
+| `SMTP_USER` | Usuari SMTP | Email |
+| `SMTP_PASS` | Contrasenya/App Password SMTP | Email |
+| `SMTP_FROM` | Adreça remitent emails | Email |
+| `FIREBASE_PROJECT_ID` | ID projecte Firebase | FCM (push natiu) |
+| `FIREBASE_PRIVATE_KEY` | Clau privada service account | FCM |
+| `FIREBASE_CLIENT_EMAIL` | Email service account | FCM |
+
+> **Auto-deploy:** Railway està connectat al repo GitHub `frolesti/alerta-desnona` branca `main`.
+> Cada `git push origin main` desencadena un build + deploy automàtic (~2-3 min).
+> El volum persistent `/app/data` conserva la BD SQLite entre deploys.
