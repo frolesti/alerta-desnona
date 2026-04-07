@@ -107,15 +107,6 @@ export default function EstadistiquesPage() {
   const maxVivendesCom = Math.max(...comunitats.map(c => c.total_vivendes), 1)
   const maxTendVal = Math.max(...tendencia.map(td => td.total_vivendes), 1)
 
-  // Sparkline for hero
-  const sparkW = 300
-  const sparkH = 60
-  const sparkPoints = tendencia.map((td, i) => {
-    const x = (i / Math.max(tendencia.length - 1, 1)) * sparkW
-    const y = sparkH - (td.total_vivendes / maxTendVal) * sparkH
-    return `${x},${y}`
-  }).join(' ')
-
   // Full chart
   const chartW = 700
   const chartH = 220
@@ -142,6 +133,14 @@ export default function EstadistiquesPage() {
   }
   const sorted = [...filtered].sort((a, b) => b.finques_vivendes - a.finques_vivendes)
 
+  // YoY change
+  const prevYear = tendencia.length >= 2 ? tendencia[tendencia.length - 2] : null
+  const currYear = tendencia.length >= 1 ? tendencia[tendencia.length - 1] : null
+  const yoyChange = prevYear && currYear && prevYear.total_vivendes > 0
+    ? ((currYear.total_vivendes - prevYear.total_vivendes) / prevYear.total_vivendes) * 100
+    : null
+  const dailyAvg = totalVivendes > 0 ? Math.round(totalVivendes / 365) : null
+
   // Unique communities for filter
   const allComs = [...new Set(provincies.map(p => p.comunitat_autonoma))].sort()
 
@@ -150,35 +149,46 @@ export default function EstadistiquesPage() {
       <h1 className="page-title">{t('stats_title')}</h1>
       <p className="page-subtitle">{t('stats_subtitle')}</p>
 
-      {/* Hero stats */}
+      {/* Hero stats — clear, human-readable */}
       <div className="stats-hero">
-        <div className="stats-hero-item">
+        <div className="stats-hero-item hero-main">
           <div className="stats-hero-value">{formatNum(totalVivendes)}</div>
           <div className="stats-hero-label">{t('stats_housing_foreclosures')}</div>
           <div className="stats-hero-year">{any}</div>
         </div>
         <div className="stats-hero-item">
-          <div className="stats-hero-value">{formatNum(totalFinques)}</div>
-          <div className="stats-hero-label">{t('stats_total_properties')}</div>
-          <div className="stats-hero-year">{any}</div>
+          {yoyChange !== null ? (
+            <>
+              <div className={`stats-hero-value ${yoyChange > 0 ? 'up' : yoyChange < 0 ? 'down' : ''}`}>
+                {yoyChange > 0 ? '\u25B2' : yoyChange < 0 ? '\u25BC' : ''} {Math.abs(Math.round(yoyChange * 10) / 10)}%
+              </div>
+              <div className="stats-hero-label">{t('stats_yoy_label')}</div>
+              <div className="stats-hero-year">{prevYear?.any} → {any}</div>
+            </>
+          ) : (
+            <>
+              <div className="stats-hero-value">{formatNum(totalFinques)}</div>
+              <div className="stats-hero-label">{t('stats_all_properties')}</div>
+              <div className="stats-hero-year">{any}</div>
+            </>
+          )}
         </div>
-        <div className="stats-hero-item mini-chart">
-          <div className="stats-hero-label" style={{ marginBottom: 8 }}>{t('stats_trend')}</div>
-          <svg width={sparkW} height={sparkH} viewBox={`0 0 ${sparkW} ${sparkH}`} className="sparkline">
-            <polyline points={sparkPoints} fill="none" stroke="var(--color-primary)" strokeWidth="2" />
-            {tendencia.length > 0 && (
-              <circle
-                cx={(tendencia.length - 1) / Math.max(tendencia.length - 1, 1) * sparkW}
-                cy={sparkH - (tendencia[tendencia.length - 1].total_vivendes / maxTendVal) * sparkH}
-                r="4" fill="var(--color-primary)"
-              />
-            )}
-          </svg>
-          <div className="spark-labels">
-            {tendencia.length > 0 && <span>{tendencia[0].any}</span>}
-            {tendencia.length > 1 && <span>{tendencia[tendencia.length - 1].any}</span>}
-          </div>
+        <div className="stats-hero-item">
+          {dailyAvg !== null ? (
+            <>
+              <div className="stats-hero-value">~{dailyAvg}</div>
+              <div className="stats-hero-label">{t('stats_daily_avg')}</div>
+              <div className="stats-hero-year">{t('stats_daily_avg_note')}</div>
+            </>
+          ) : (
+            <div className="stats-hero-label">{t('stats_no_data')}</div>
+          )}
         </div>
+      </div>
+
+      {/* Data transparency note */}
+      <div className="stats-data-note">
+        <p>{t('stats_data_note')}</p>
       </div>
 
       {/* Tab navigation */}
@@ -205,6 +215,10 @@ export default function EstadistiquesPage() {
             <div className="casos-summary">
               <span className="casos-total-badge">{casosTotal.toLocaleString('ca-ES')} {t('casos_total')}</span>
             </div>
+          </div>
+
+          <div className="casos-data-note">
+            <p>{t('casos_data_note')}</p>
           </div>
 
           <div className="filtres-bar">

@@ -93,7 +93,7 @@
 [data-theme="light"] .panel-chevron-tab {
   background: rgba(255, 255, 255, 0.92);
   border-color: rgba(0,0,0,0.08);
-  color: #64748b;
+  color: #475569;
 }
 [data-theme="light"] .panel-chevron-tab:hover {
   background: rgba(255, 255, 255, 1);
@@ -501,56 +501,44 @@ a:hover {
   letter-spacing: 0.05em;
 }
 
-/* Chevron toggle tab — sits on the right edge of the panel */
+/* Chevron toggle tab — child of overlay, always attached to right edge */
 .panel-chevron-tab {
   position: absolute;
-  z-index: 1000;
+  right: -24px;
+  top: 12px;
+  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   width: 24px;
   height: 48px;
   border: 1px solid rgba(255,255,255,0.08);
+  border-left: none;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
   background: rgba(26, 29, 39, 0.92);
   backdrop-filter: blur(10px);
   color: var(--color-text-secondary);
   cursor: pointer;
   padding: 0;
-  transition: left 0.3s ease, background 0.15s, color 0.15s, border-radius 0.3s;
+  transition: background 0.15s, color 0.15s;
 }
 .panel-chevron-tab:hover {
   background: rgba(26, 29, 39, 1);
   color: var(--color-text);
 }
-.panel-chevron-tab.open {
-  /* right edge of the overlay panel */
-  top: calc(var(--space-md) + 12px);
-  left: calc(60px + 360px - 1px);
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-  border-left: none;
-}
-.panel-chevron-tab.open svg {
-  transform: rotate(0deg);
+.panel-chevron-tab svg {
   transition: transform 0.3s ease;
 }
-.panel-chevron-tab.closed {
-  top: var(--space-md);
-  left: 60px;
-  border-radius: var(--radius-sm);
-}
-.panel-chevron-tab.closed svg {
+.mapa-overlay.collapsed .panel-chevron-tab svg {
   transform: rotate(180deg);
-  transition: transform 0.3s ease;
 }
 
-/* Panel slide animation */
+/* Panel slide animation — slides left, leaving chevron peeking out */
 .mapa-overlay {
-  transition: transform 0.3s ease, opacity 0.3s ease;
+  transition: transform 0.3s ease;
 }
 .mapa-overlay.collapsed {
-  transform: translateX(-110%);
-  opacity: 0;
-  pointer-events: none;
+  transform: translateX(calc(-100% + 24px - 60px));
 }
 
 .popup-jutjat-text {
@@ -1522,14 +1510,8 @@ a:hover {
     top: var(--space-sm);
   }
 
-  .panel-chevron-tab.open {
-    left: auto;
-    right: 0;
-    top: calc(var(--space-sm) + 12px);
-  }
-  .panel-chevron-tab.closed {
-    left: var(--space-sm);
-    top: var(--space-sm);
+  .mapa-overlay.collapsed {
+    transform: translateX(calc(-100% + 24px - var(--space-sm)));
   }
 
   .stats-grid {
@@ -1638,18 +1620,19 @@ a:hover {
   border: 1px solid rgba(255,255,255,0.06);
 }
 
-.stats-hero-item.mini-chart {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
 .stats-hero-value {
   font-size: 2.4rem;
   font-weight: 800;
   color: var(--color-danger);
   letter-spacing: -1px;
+}
+
+.stats-hero-value.up {
+  color: var(--color-danger);
+}
+
+.stats-hero-value.down {
+  color: #22c55e;
 }
 
 .stats-hero-label {
@@ -1664,17 +1647,23 @@ a:hover {
   margin-top: 2px;
 }
 
-.sparkline {
-  overflow: visible;
+/* Data transparency note */
+.stats-data-note,
+.casos-data-note {
+  background: rgba(255, 165, 0, 0.08);
+  border: 1px solid rgba(255, 165, 0, 0.2);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm) var(--space-md);
+  margin-bottom: var(--space-lg);
+  font-size: 0.82rem;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
 }
 
-.spark-labels {
-  display: flex;
-  justify-content: space-between;
-  width: 300px;
-  font-size: 0.7rem;
-  color: var(--color-text-muted);
-  margin-top: 4px;
+[data-theme="light"] .stats-data-note,
+[data-theme="light"] .casos-data-note {
+  background: rgba(255, 165, 0, 0.06);
+  border-color: rgba(255, 165, 0, 0.25);
 }
 
 /* Stats toggle */

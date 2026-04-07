@@ -257,20 +257,18 @@ export default function MapaPage() {
         )}
       </div>
 
-      {/* Chevron tab — always visible, toggles panel */}
-      <button
-        className={`panel-chevron-tab ${panelVisible ? 'open' : 'closed'}`}
-        onClick={() => setPanelVisible(v => !v)}
-        title={panelVisible ? t('popup_hide_panel') : t('popup_toggle_panel')}
-        aria-label={panelVisible ? t('popup_hide_panel') : t('popup_toggle_panel')}
-      >
-        <svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M8 2L2 8L8 14" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-      </button>
-
-      {/* Stats overlay */}
+      {/* Stats overlay — sliding drawer with attached chevron */}
       <div className={`mapa-overlay ${panelVisible ? '' : 'collapsed'}`}>
+        <button
+          className="panel-chevron-tab"
+          onClick={() => setPanelVisible(v => !v)}
+          title={panelVisible ? t('popup_hide_panel') : t('popup_toggle_panel')}
+          aria-label={panelVisible ? t('popup_hide_panel') : t('popup_toggle_panel')}
+        >
+          <svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 2L2 8L8 14" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
         <div className="stats-panel">
           <h2>{t('map_title')}</h2>
 
