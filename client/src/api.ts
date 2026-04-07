@@ -346,6 +346,8 @@ export interface MapPointCas {
   quantitat_reclamada: string | null;
   valor_subhasta: string | null;
   geocodat: number;
+  tipus_procediment: string | null;
+  jutjat: string | null;
 }
 
 export function getCasos(params?: Record<string, string>) {

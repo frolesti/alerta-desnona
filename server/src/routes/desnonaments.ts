@@ -147,7 +147,8 @@ desnonamentRoutes.get('/mapa', (req: Request, res: Response) => {
              a.pis, a.porta, a.codi_postal,
              d.tipus_subhasta, d.tipus_be,
              d.vivenda_habitual, d.quantitat_reclamada,
-             d.valor_subhasta, a.geocodat
+             d.valor_subhasta, a.geocodat,
+             d.tipus_procediment, d.jutjat
       FROM desnonaments d
       JOIN adreces a ON d.adreca_id = a.id
       WHERE ${where}

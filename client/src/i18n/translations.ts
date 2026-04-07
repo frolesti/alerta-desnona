@@ -398,6 +398,18 @@ const ca = {
   map_visible_cases: 'casos visibles',
   map_zoom_to_see: 'Apropa\'t al mapa',
   filter_all: 'Tots',
+
+  // === Popup mapa — context social ===
+  popup_motiu: 'Motiu',
+  popup_jutjat: 'Jutjat',
+  popup_residencia_habitual: 'Residència habitual',
+  popup_motiu_ejecucion_hipotecaria: 'Execució hipotecària',
+  popup_motiu_impago_alquiler: 'Impagament de lloguer',
+  popup_motiu_ocupacion: 'Ocupació sense títol',
+  popup_motiu_cautelar: 'Mesura cautelar',
+  popup_motiu_desconegut: 'Procediment judicial',
+  popup_toggle_panel: 'Mostrar estadístiques',
+  popup_hide_panel: 'Amagar',
 } as const
 
 type TranslationDict = Record<keyof typeof ca, string>
@@ -767,6 +779,17 @@ const es: TranslationDict = {
   map_zoom_to_see: 'Acércate al mapa',
   filter_all: 'Todos',
   map_hotspots: 'Focos principales',
+
+  popup_motiu: 'Motivo',
+  popup_jutjat: 'Juzgado',
+  popup_residencia_habitual: 'Residencia habitual',
+  popup_motiu_ejecucion_hipotecaria: 'Ejecución hipotecaria',
+  popup_motiu_impago_alquiler: 'Impago de alquiler',
+  popup_motiu_ocupacion: 'Ocupación sin título',
+  popup_motiu_cautelar: 'Medida cautelar',
+  popup_motiu_desconegut: 'Procedimiento judicial',
+  popup_toggle_panel: 'Mostrar estadísticas',
+  popup_hide_panel: 'Ocultar',
 }
 
 const gl: TranslationDict = {
@@ -1134,6 +1157,17 @@ const gl: TranslationDict = {
   map_zoom_to_see: 'Achega ao mapa',
   filter_all: 'Todos',
   map_hotspots: 'Focos principais',
+
+  popup_motiu: 'Motivo',
+  popup_jutjat: 'Xulgado',
+  popup_residencia_habitual: 'Residencia habitual',
+  popup_motiu_ejecucion_hipotecaria: 'Execución hipotecaria',
+  popup_motiu_impago_alquiler: 'Impago de alugueiro',
+  popup_motiu_ocupacion: 'Ocupación sen título',
+  popup_motiu_cautelar: 'Medida cautelar',
+  popup_motiu_desconegut: 'Procedemento xudicial',
+  popup_toggle_panel: 'Amosar estatísticas',
+  popup_hide_panel: 'Agochar',
 }
 
 const eu: TranslationDict = {
@@ -1501,6 +1535,17 @@ const eu: TranslationDict = {
   map_zoom_to_see: 'Hurbildu mapara',
   filter_all: 'Denak',
   map_hotspots: 'Foku nagusiak',
+
+  popup_motiu: 'Arrazoia',
+  popup_jutjat: 'Epaitegia',
+  popup_residencia_habitual: 'Ohiko bizilekua',
+  popup_motiu_ejecucion_hipotecaria: 'Hipoteka-exekuzioa',
+  popup_motiu_impago_alquiler: 'Alokairu-ez ordainketa',
+  popup_motiu_ocupacion: 'Titulurik gabeko okupazioa',
+  popup_motiu_cautelar: 'Kautela-neurria',
+  popup_motiu_desconegut: 'Prozedura judiziala',
+  popup_toggle_panel: 'Estatistikak erakutsi',
+  popup_hide_panel: 'Ezkutatu',
 }
 
 export const translations: Record<Lang, TranslationDict> = { ca, es, gl, eu }

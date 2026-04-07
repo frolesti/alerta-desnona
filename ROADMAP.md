@@ -12,7 +12,7 @@ pàgina web (PWA) + app mòbil (Capacitor), amb notificacions push i desplegamen
 - [x] Environment secrets documentats a `.env.example`
 - [x] Protection rules documentades (production requereix approval manual)
 - [x] Environments creats a GitHub → Settings → Environments
-- [ ] Secrets afegits a cada environment (manual)
+- [x] Secrets afegits a cada environment
 
 ## Fase 1: PWA + Push Notifications
 > Convertir el client React/Vite en una Progressive Web App instal·lable amb notificacions push.
@@ -28,7 +28,7 @@ pàgina web (PWA) + app mòbil (Capacitor), amb notificacions push i desplegamen
 - [x] Component UI per activar/desactivar notificacions
 - [x] Integració cron.ts amb push real (substituir placeholder)
 - [x] Generar VAPID keys reals i afegir a `.env` local
-- [ ] Afegir VAPID secrets a GitHub Environments (manual)
+- [x] Afegir VAPID secrets a GitHub Environments
 - [ ] Provar instal·lació PWA al mòbil (manual)
 - [ ] Provar notificació push real (manual)
 
@@ -67,7 +67,7 @@ pàgina web (PWA) + app mòbil (Capacitor), amb notificacions push i desplegamen
 - [x] Servei FCM complet (`services/fcm.ts`) amb `initFCM()` + `notificarImminentsFCM()`
 - [x] Integrat amb `cron.ts` (web-push + FCM + email en paral·lel)
 - [x] Neteja automàtica de tokens invàlids
-- [ ] Afegir secrets Firebase a GitHub Environments (manual)
+- [x] Afegir secrets Firebase a GitHub Environments
 - [ ] Provar push natiu real (manual)
 
 ## Fase 5: Deploy a Producció
@@ -80,9 +80,13 @@ pàgina web (PWA) + app mòbil (Capacitor), amb notificacions push i desplegamen
 - [x] Opcions de deploy comentades: Railway, Fly.io, SSH/VPS
 - [x] `VITE_API_URL` env var per builds Capacitor/staging
 - [x] Type declarations (`vite-env.d.ts`)
-- [ ] Escollir plataforma (Railway, Fly.io, VPS...) (manual)
-- [ ] Configurar deploy real + domini + SSL (manual)
+- [x] Deploy a Railway (Free tier) amb domini públic
+- [x] Volum persistent per SQLite (/app/data)
+- [x] 17 variables d'entorn configurades
+- [x] BD poblada amb 10.883 casos + 624 INE
+- [x] `daily-update.ts` compatible amb producció (node dist/ vs npx tsx)
 - [ ] Migrar de SQLite a PostgreSQL (si escala ho requereix, futur)
+- [ ] Configurar domini personalitzat (futur)
 
 ---
 

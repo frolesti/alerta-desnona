@@ -1,5 +1,5 @@
 ﻿import { useEffect, useState, useCallback, useRef, useMemo } from 'react'
-import { MapContainer, TileLayer, Popup, Marker, useMap } from 'react-leaflet'
+import { MapContainer, TileLayer, Popup, Marker, useMap, ZoomControl } from 'react-leaflet'
 import MarkerClusterGroup from 'react-leaflet-cluster'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
@@ -64,6 +64,7 @@ export default function MapaPage() {
   const [casesLoading, setCasesLoading] = useState(false)
   const [estatFilter, setEstatFilter] = useState<EstatFilter>('tots')
   const [flyTarget, setFlyTarget] = useState<L.LatLngBounds | null>(null)
+  const [panelVisible, setPanelVisible] = useState(true)
   const { t } = useTranslation()
   const lastFetchKey = useRef('')
 
@@ -135,13 +136,14 @@ export default function MapaPage() {
           center={[40.0, -3.5]}
           zoom={6}
           style={{ height: '100%', width: '100%' }}
-          zoomControl={true}
+          zoomControl={false}
         >
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
           <FlyController target={flyTarget} />
+          <ZoomControl position="bottomright" />
 
           {/* ---- Real individual cases with clustering ---- */}
           <MarkerClusterGroup
@@ -213,22 +215,25 @@ export default function MapaPage() {
                       <div className="popup-address-street">{addressLine1}</div>
                       {addressLine2 && <div className="popup-address-city">{addressLine2}</div>}
                     </div>
-                    {c.tipus_be && (
+                    {/* Motiu del desnonament — context social */}
+                    {c.tipus_procediment && (
+                      <div className="popup-detail-row">
+                        <span className="popup-detail-icon">{'\u2696\uFE0F'}</span>
+                        <span>{t(`popup_motiu_${c.tipus_procediment}` as any) || c.tipus_procediment}</span>
+                      </div>
+                    )}
+                    {/* Residència habitual */}
+                    {c.vivenda_habitual === 1 && (
                       <div className="popup-detail-row">
                         <span className="popup-detail-icon">{'\uD83C\uDFE0'}</span>
-                        <span>{t(`tipus_be_${c.tipus_be.toLowerCase().replace(/\s+/g, '_')}` as any) || c.tipus_be}{c.vivenda_habitual ? ` · ${t('detail_habitatge_habitual')}` : ''}</span>
+                        <span>{t('popup_residencia_habitual')}</span>
                       </div>
                     )}
-                    {c.quantitat_reclamada && (
+                    {/* Jutjat que executa */}
+                    {c.jutjat && (
                       <div className="popup-detail-row">
-                        <span className="popup-detail-icon">{'\uD83D\uDCB0'}</span>
-                        <span>{t('detail_quantitat_reclamada')}: {c.quantitat_reclamada}</span>
-                      </div>
-                    )}
-                    {c.valor_subhasta && (
-                      <div className="popup-detail-row">
-                        <span className="popup-detail-icon">{'\uD83C\uDFF7\uFE0F'}</span>
-                        <span>{t('detail_valor_subhasta')}: {c.valor_subhasta}</span>
+                        <span className="popup-detail-icon">{'\uD83C\uDFDB\uFE0F'}</span>
+                        <span className="popup-jutjat-text">{c.jutjat}</span>
                       </div>
                     )}
                     <div className="popup-actions">
@@ -252,10 +257,31 @@ export default function MapaPage() {
         )}
       </div>
 
+      {/* Toggle button when panel hidden */}
+      {!panelVisible && (
+        <button
+          className="panel-toggle-btn"
+          onClick={() => setPanelVisible(true)}
+          title={t('popup_toggle_panel')}
+        >
+          📊
+        </button>
+      )}
+
       {/* Stats overlay */}
+      {panelVisible && (
       <div className="mapa-overlay">
         <div className="stats-panel">
-          <h2>{t('map_title')}</h2>
+          <div className="stats-panel-header">
+            <h2>{t('map_title')}</h2>
+            <button
+              className="panel-close-btn"
+              onClick={() => setPanelVisible(false)}
+              title={t('popup_hide_panel')}
+            >
+              ✕
+            </button>
+          </div>
 
           {/* Estat filter */}
           <div className="map-estat-filter">
@@ -318,6 +344,7 @@ export default function MapaPage() {
           </Link>
         </div>
       </div>
+      )}
     </div>
   )
 }
