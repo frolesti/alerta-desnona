@@ -538,7 +538,7 @@ a:hover {
   transition: transform 0.3s ease;
 }
 .mapa-overlay.collapsed {
-  transform: translateX(calc(-100% + 24px - 60px));
+  transform: translateX(calc(-100% - 60px));
 }
 
 .popup-jutjat-text {
@@ -1511,7 +1511,7 @@ a:hover {
   }
 
   .mapa-overlay.collapsed {
-    transform: translateX(calc(-100% + 24px - var(--space-sm)));
+    transform: translateX(calc(-100% - var(--space-sm)));
   }
 
   .stats-grid {
