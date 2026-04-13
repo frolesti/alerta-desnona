@@ -1666,6 +1666,76 @@ a:hover {
   border-color: rgba(255, 165, 0, 0.25);
 }
 
+/* Partial year notice */
+.stats-parcial-notice {
+  background: var(--color-bg-card);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm) var(--space-md);
+  margin-bottom: var(--space-md);
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+.stats-parcial-notice strong {
+  color: var(--color-text);
+}
+
+/* CGPJ Breakdown bar */
+.cgpj-breakdown {
+  margin-bottom: var(--space-lg);
+}
+.breakdown-bar {
+  display: flex;
+  height: 18px;
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  background: rgba(255,255,255,0.06);
+  margin-bottom: var(--space-sm);
+}
+.breakdown-segment {
+  min-width: 2px;
+  transition: width 0.4s ease;
+}
+.seg-lau { background: #e67e22; }
+.seg-hip { background: #3498db; }
+.seg-alt { background: #95a5a6; }
+.breakdown-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm) var(--space-md);
+  font-size: 0.82rem;
+  color: var(--color-text-secondary);
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.legend-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+.legend-dot.seg-lau { background: #e67e22; }
+.legend-dot.seg-hip { background: #3498db; }
+.legend-dot.seg-alt { background: #95a5a6; }
+.breakdown-mini {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  display: inline-block;
+  margin-right: 0.5rem;
+}
+.breakdown-mini.seg-lau::before { content: '●'; color: #e67e22; margin-right: 3px; }
+.breakdown-mini.seg-hip::before { content: '●'; color: #3498db; margin-right: 3px; }
+.card-stat-breakdown {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 8px;
+  margin-top: 4px;
+}
+
 /* Stats toggle */
 .stats-toggle {
   display: flex;

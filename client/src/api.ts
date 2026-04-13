@@ -248,6 +248,111 @@ export function getINEMapa() {
   return fetchJSON<INEResponse<PuntMapaINE[]>>('/estadistiques/ine/mapa');
 }
 
+// === Estadístiques CGPJ (llançaments judicials — desnonaments executats) ===
+
+export interface CGPJResum {
+  total: number;
+  hipotecaria: number;
+  lau: number;
+  altres: number;
+  ocupacio: number;
+  variacio_percentual: number | null;
+  total_anterior: number;
+  daily_avg: number;
+}
+
+export interface CGPJParcial {
+  any: number;
+  total: number;
+  hipotecaria: number;
+  lau: number;
+  altres: number;
+  ocupacio: number;
+}
+
+export interface CGPJResumResponse {
+  ok: boolean;
+  data: CGPJResum | null;
+  any: number | null;
+  any_anterior?: number;
+  parcial?: CGPJParcial | null;
+  font?: string;
+  url_font?: string;
+  message?: string;
+}
+
+export interface CGPJComunitat {
+  comunitat_autonoma: string;
+  lanzaments_total: number;
+  lanzaments_hipotecaria: number;
+  lanzaments_lau: number;
+  lanzaments_altres: number;
+  ocupacio_verbal: number;
+  evolucio_percentual: number | null;
+  poblacio: number | null;
+  taxa_per_100k: number | null;
+  total_anterior?: number;
+}
+
+export interface CGPJComunitatsResponse {
+  ok: boolean;
+  data: CGPJComunitat[];
+  any: number | null;
+  any_anterior?: number;
+  font?: string;
+}
+
+export interface CGPJTendencia {
+  any: number;
+  total: number;
+  hipotecaria: number;
+  lau: number;
+  altres: number;
+  ocupacio: number;
+}
+
+export interface CGPJTendenciaResponse {
+  ok: boolean;
+  data: CGPJTendencia[];
+  font?: string;
+}
+
+export interface CGPJProvincia {
+  provincia: string;
+  lanzaments_total: number;
+  lanzaments_hipotecaria: number;
+  lanzaments_lau: number;
+  lanzaments_altres: number;
+  ocupacio_verbal: number;
+  execucions_hipotecaries: number;
+  concursos_total: number;
+  monitoris: number;
+}
+
+export interface CGPJProvinciesResponse {
+  ok: boolean;
+  data: CGPJProvincia[];
+  any: number | null;
+  font?: string;
+}
+
+export function getCGPJResum() {
+  return fetchJSON<CGPJResumResponse>('/estadistiques/cgpj');
+}
+
+export function getCGPJComunitats() {
+  return fetchJSON<CGPJComunitatsResponse>('/estadistiques/cgpj/comunitats');
+}
+
+export function getCGPJTendencia(params?: { comunitat?: string }) {
+  const query = params?.comunitat ? '?comunitat=' + encodeURIComponent(params.comunitat) : '';
+  return fetchJSON<CGPJTendenciaResponse>(`/estadistiques/cgpj/tendencia${query}`);
+}
+
+export function getCGPJProvincies() {
+  return fetchJSON<CGPJProvinciesResponse>('/estadistiques/cgpj/provincies');
+}
+
 // Detall d'una província
 export interface ProvinciaDetall {
   provincia: string;

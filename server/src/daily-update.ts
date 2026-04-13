@@ -217,6 +217,16 @@ async function main() {
     console.log(`\n⏭️  Fase 5: INE — s'executa només els dilluns (avui és ${['dg', 'dl', 'dm', 'dc', 'dj', 'dv', 'ds'][dayOfWeek]})`);
   }
 
+  // ── Fase 5b: CGPJ (només dilluns) ──
+  if (dayOfWeek === 1) {
+    runStep(
+      'Fase 5b: Actualitzar estadístiques CGPJ (setmanal)',
+      buildCommand('fetch-cgpj', '--all'),
+    );
+  } else {
+    console.log(`\n⏭️  Fase 5b: CGPJ — s'executa només els dilluns (avui és ${['dg', 'dl', 'dm', 'dc', 'dj', 'dv', 'ds'][dayOfWeek]})`);
+  }
+
   // ── Fase 6: Actualitzar estats ──
   markImminentCases();
 

@@ -336,3 +336,249 @@ estadistiquesRoutes.get('/ine/mapa', (_req: Request, res: Response) => {
     res.status(500).json({ ok: false, error: 'Error intern del servidor' });
   }
 });
+
+// ═══════════════════════════════════════════════════════════════
+// ══ CGPJ — Consejo General del Poder Judicial ═══════════════
+// ═══════════════════════════════════════════════════════════════
+// Llançaments judicials practicats (desnonaments executats)
+// desglossats per tipus: hipotecari, LAU (lloguer), altres
+
+// GET /api/estadistiques/cgpj — Resum general (últim any)
+estadistiquesRoutes.get('/cgpj', (_req: Request, res: Response) => {
+  try {
+    const db = getDB();
+
+    const darrerAny = db.prepare(
+      "SELECT MAX(any) as any FROM estadistiques_cgpj WHERE ambit = 'ccaa'"
+    ).get() as any;
+
+    if (!darrerAny?.any) {
+      return res.json({ ok: true, data: null, any: null, message: 'No hi ha dades CGPJ. Executa: npx tsx src/fetch-cgpj.ts' });
+    }
+
+    const maxAny = darrerAny.any;
+    const currentYear = new Date().getFullYear();
+
+    // If latest year == current calendar year, it's likely partial data.
+    // Show the latest COMPLETE year as the primary stat instead.
+    const esParcial = maxAny === currentYear;
+    const any_ = esParcial && maxAny > 2022 ? maxAny - 1 : maxAny;
+
+    // Totals nacionals (primary year — complete)
+    const totals = db.prepare(`
+      SELECT SUM(lanzaments_total) as total,
+             SUM(lanzaments_hipotecaria) as hipotecaria,
+             SUM(lanzaments_lau) as lau,
+             SUM(lanzaments_altres) as altres,
+             SUM(ocupacio_verbal) as ocupacio
+      FROM estadistiques_cgpj
+      WHERE ambit = 'ccaa' AND any = ?
+    `).get(any_) as any;
+
+    // Any anterior per variació
+    const totalsAnterior = db.prepare(`
+      SELECT SUM(lanzaments_total) as total
+      FROM estadistiques_cgpj
+      WHERE ambit = 'ccaa' AND any = ?
+    `).get(any_ - 1) as any;
+
+    const variacio = totalsAnterior?.total > 0
+      ? ((totals.total - totalsAnterior.total) / totalsAnterior.total) * 100
+      : null;
+
+    // Partial year data (if exists)
+    let parcial = null;
+    if (esParcial) {
+      const totalsParcial = db.prepare(`
+        SELECT SUM(lanzaments_total) as total,
+               SUM(lanzaments_hipotecaria) as hipotecaria,
+               SUM(lanzaments_lau) as lau,
+               SUM(lanzaments_altres) as altres,
+               SUM(ocupacio_verbal) as ocupacio
+        FROM estadistiques_cgpj
+        WHERE ambit = 'ccaa' AND any = ?
+      `).get(maxAny) as any;
+
+      if (totalsParcial?.total > 0) {
+        parcial = {
+          any: maxAny,
+          total: totalsParcial.total,
+          hipotecaria: totalsParcial.hipotecaria || 0,
+          lau: totalsParcial.lau || 0,
+          altres: totalsParcial.altres || 0,
+          ocupacio: totalsParcial.ocupacio || 0,
+        };
+      }
+    }
+
+    res.json({
+      ok: true,
+      data: {
+        total: totals.total || 0,
+        hipotecaria: totals.hipotecaria || 0,
+        lau: totals.lau || 0,
+        altres: totals.altres || 0,
+        ocupacio: totals.ocupacio || 0,
+        variacio_percentual: variacio !== null ? Math.round(variacio * 10) / 10 : null,
+        total_anterior: totalsAnterior?.total || 0,
+        daily_avg: totals.total > 0 ? Math.round(totals.total / 365) : 0,
+      },
+      any: any_,
+      any_anterior: any_ - 1,
+      parcial,
+      font: 'CGPJ — Consejo General del Poder Judicial',
+      url_font: 'https://www.poderjudicial.es/cgpj/es/Temas/Estadistica-Judicial/Estudios-e-Informes/Efecto-de-la-Crisis-en-los-organos-judiciales/',
+    });
+  } catch (error) {
+    console.error('Error obtenint dades CGPJ:', error);
+    res.status(500).json({ ok: false, error: 'Error intern del servidor' });
+  }
+});
+
+// GET /api/estadistiques/cgpj/comunitats — Ranking per CCAA (últim any)
+estadistiquesRoutes.get('/cgpj/comunitats', (_req: Request, res: Response) => {
+  try {
+    const db = getDB();
+
+    const darrerAny = db.prepare(
+      "SELECT MAX(any) as any FROM estadistiques_cgpj WHERE ambit = 'ccaa'"
+    ).get() as any;
+
+    if (!darrerAny?.any) {
+      return res.json({ ok: true, data: [], any: null });
+    }
+
+    const maxAny = darrerAny.any;
+    const currentYear = new Date().getFullYear();
+    const esParcial = maxAny === currentYear;
+    const any_ = esParcial && maxAny > 2022 ? maxAny - 1 : maxAny;
+
+    const dades = db.prepare(`
+      SELECT nom as comunitat_autonoma,
+             lanzaments_total, lanzaments_hipotecaria, lanzaments_lau, lanzaments_altres,
+             ocupacio_verbal, evolucio_percentual, poblacio, taxa_per_100k
+      FROM estadistiques_cgpj
+      WHERE ambit = 'ccaa' AND any = ?
+      ORDER BY lanzaments_total DESC
+    `).all(any_) as any[];
+
+    // Obtenir any anterior per variació manual si evolucio_percentual és null
+    const anteriors = db.prepare(`
+      SELECT nom, lanzaments_total
+      FROM estadistiques_cgpj
+      WHERE ambit = 'ccaa' AND any = ?
+    `).all(any_ - 1) as any[];
+
+    const anteriorMap = new Map(anteriors.map((d: any) => [d.nom, d.lanzaments_total]));
+
+    const dadesAmbVariacio = dades.map((d: any) => {
+      if (d.evolucio_percentual === null) {
+        const anterior = anteriorMap.get(d.comunitat_autonoma) || 0;
+        d.evolucio_percentual = anterior > 0
+          ? Math.round(((d.lanzaments_total - anterior) / anterior) * 1000) / 10
+          : null;
+      }
+      d.total_anterior = anteriorMap.get(d.comunitat_autonoma) || 0;
+      return d;
+    });
+
+    res.json({
+      ok: true,
+      data: dadesAmbVariacio,
+      any: any_,
+      any_anterior: any_ - 1,
+      font: 'CGPJ — Consejo General del Poder Judicial',
+    });
+  } catch (error) {
+    console.error('Error obtenint CGPJ per comunitats:', error);
+    res.status(500).json({ ok: false, error: 'Error intern del servidor' });
+  }
+});
+
+// GET /api/estadistiques/cgpj/tendencia — Evolució anual
+estadistiquesRoutes.get('/cgpj/tendencia', (req: Request, res: Response) => {
+  try {
+    const db = getDB();
+    const { comunitat } = req.query;
+
+    let query: string;
+    const params: any[] = [];
+
+    if (comunitat) {
+      query = `
+        SELECT any,
+               SUM(lanzaments_total) as total,
+               SUM(lanzaments_hipotecaria) as hipotecaria,
+               SUM(lanzaments_lau) as lau,
+               SUM(lanzaments_altres) as altres,
+               SUM(ocupacio_verbal) as ocupacio
+        FROM estadistiques_cgpj
+        WHERE ambit = 'ccaa' AND nom = ?
+        GROUP BY any ORDER BY any ASC
+      `;
+      params.push(comunitat);
+    } else {
+      query = `
+        SELECT any,
+               SUM(lanzaments_total) as total,
+               SUM(lanzaments_hipotecaria) as hipotecaria,
+               SUM(lanzaments_lau) as lau,
+               SUM(lanzaments_altres) as altres,
+               SUM(ocupacio_verbal) as ocupacio
+        FROM estadistiques_cgpj
+        WHERE ambit = 'ccaa'
+        GROUP BY any ORDER BY any ASC
+      `;
+    }
+
+    const tendencia = db.prepare(query).all(...params);
+
+    res.json({
+      ok: true,
+      data: tendencia,
+      font: 'CGPJ — Consejo General del Poder Judicial',
+    });
+  } catch (error) {
+    console.error('Error obtenint tendència CGPJ:', error);
+    res.status(500).json({ ok: false, error: 'Error intern del servidor' });
+  }
+});
+
+// GET /api/estadistiques/cgpj/provincies — Dades per província (últim any)
+estadistiquesRoutes.get('/cgpj/provincies', (_req: Request, res: Response) => {
+  try {
+    const db = getDB();
+
+    const darrerAny = db.prepare(
+      "SELECT MAX(any) as any FROM estadistiques_cgpj WHERE ambit = 'provincia'"
+    ).get() as any;
+
+    if (!darrerAny?.any) {
+      return res.json({ ok: true, data: [], any: null });
+    }
+
+    const maxAny = darrerAny.any;
+    const currentYear = new Date().getFullYear();
+    const esParcial = maxAny === currentYear;
+    const anyShow = esParcial && maxAny > 2022 ? maxAny - 1 : maxAny;
+
+    const dades = db.prepare(`
+      SELECT nom as provincia,
+             lanzaments_total, lanzaments_hipotecaria, lanzaments_lau, lanzaments_altres,
+             ocupacio_verbal, execucions_hipotecaries, concursos_total, monitoris
+      FROM estadistiques_cgpj
+      WHERE ambit = 'provincia' AND any = ?
+      ORDER BY lanzaments_total DESC
+    `).all(anyShow);
+
+    res.json({
+      ok: true,
+      data: dades,
+      any: anyShow,
+      font: 'CGPJ — Consejo General del Poder Judicial',
+    });
+  } catch (error) {
+    console.error('Error obtenint CGPJ per províncies:', error);
+    res.status(500).json({ ok: false, error: 'Error intern del servidor' });
+  }
+});

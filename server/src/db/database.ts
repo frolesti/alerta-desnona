@@ -216,6 +216,40 @@ function createTables(): void {
     CREATE INDEX IF NOT EXISTS idx_notificacions_usuari ON notificacions(usuari_id);
     CREATE INDEX IF NOT EXISTS idx_estadistiques_provincia ON estadistiques_ine(codi_provincia, any);
     CREATE INDEX IF NOT EXISTS idx_estadistiques_comunitat ON estadistiques_ine(comunitat_autonoma, any);
+
+    -- ─── Estadístiques CGPJ (llançaments judicials) ──────────────
+    -- Dades del Consejo General del Poder Judicial — Estadística Judicial
+    -- Font: "Datos sobre el efecto de la crisis en los órganos judiciales"
+    -- Cobertura: Llançaments practicats (desnonaments executats) per CCAA i província
+    CREATE TABLE IF NOT EXISTS estadistiques_cgpj (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      ambit TEXT NOT NULL,                  -- 'ccaa' o 'provincia'
+      nom TEXT NOT NULL,                    -- Nom CCAA o província
+      any INTEGER NOT NULL,
+      -- Llançaments practicats (desnonaments executats)
+      lanzaments_total INTEGER NOT NULL DEFAULT 0,
+      lanzaments_hipotecaria INTEGER NOT NULL DEFAULT 0,
+      lanzaments_lau INTEGER NOT NULL DEFAULT 0,
+      lanzaments_altres INTEGER NOT NULL DEFAULT 0,
+      -- Verbals possessoris per ocupació il·legal
+      ocupacio_verbal INTEGER NOT NULL DEFAULT 0,
+      -- Evolució i dades per càpita (només CCAA)
+      evolucio_percentual REAL,
+      poblacio INTEGER,
+      taxa_per_100k REAL,
+      -- Altres indicadors (només província)
+      execucions_hipotecaries INTEGER,
+      concursos_total INTEGER,
+      monitoris INTEGER,
+      -- Metadades
+      font TEXT NOT NULL DEFAULT 'CGPJ — Consejo General del Poder Judicial',
+      url_font TEXT NOT NULL DEFAULT 'https://www.poderjudicial.es/cgpj/es/Temas/Estadistica-Judicial/Estudios-e-Informes/Efecto-de-la-Crisis-en-los-organos-judiciales/',
+      actualitzat_el TEXT NOT NULL DEFAULT (datetime('now')),
+      UNIQUE(ambit, nom, any)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_cgpj_ambit_any ON estadistiques_cgpj(ambit, any);
+    CREATE INDEX IF NOT EXISTS idx_cgpj_nom ON estadistiques_cgpj(nom, any);
   `);
 
   // ─── Migració: afegir columna tipus_procediment si no existeix ──
