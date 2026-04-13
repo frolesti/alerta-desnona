@@ -19,7 +19,7 @@ export interface Adreca {
   comunitatAutonoma: string | null;
   latitud: number | null;
   longitud: number | null;
-  geocodat: number; // 0=no, 1=cadastre, 2=nominatim
+  geocodat: number; // 0=no, 1=cadastre(exact), 2=street-level, 3=city-level, -1=error
   refCatastral: string | null;
 }
 

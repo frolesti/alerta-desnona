@@ -27,6 +27,21 @@ const caseIconImminent = L.divIcon({
   iconAnchor: [7, 7],
 })
 
+const caseIconExecutat = L.divIcon({
+  className: 'case-marker executat',
+  html: '<div class="case-marker-dot executat"></div>',
+  iconSize: [8, 8],
+  iconAnchor: [4, 4],
+})
+
+// City-level markers (geocodat=3) — ring instead of solid dot
+const caseIconCityLevel = L.divIcon({
+  className: 'case-marker city-level',
+  html: '<div class="case-marker-ring"></div>',
+  iconSize: [10, 10],
+  iconAnchor: [5, 5],
+})
+
 type EstatFilter = 'tots' | 'imminent' | 'programat'
 
 /** Custom cluster icon — circle with count */
@@ -57,6 +72,8 @@ function FlyController({ target }: { target: L.LatLngBounds | null }) {
   return null
 }
 
+type PanelState = 'expanded' | 'minimized' | 'hidden'
+
 export default function MapaPage() {
   const [cases, setCases] = useState<MapPointCas[]>([])
   const [totalCount, setTotalCount] = useState(0)
@@ -64,13 +81,13 @@ export default function MapaPage() {
   const [casesLoading, setCasesLoading] = useState(false)
   const [estatFilter, setEstatFilter] = useState<EstatFilter>('tots')
   const [flyTarget, setFlyTarget] = useState<L.LatLngBounds | null>(null)
-  const [panelVisible, setPanelVisible] = useState(true)
+  const [panelState, setPanelState] = useState<PanelState>('expanded')
   const { t } = useTranslation()
   const lastFetchKey = useRef('')
 
-  // Fetch ALL real cases, re-fetch when filter changes
+  // Fetch ALL geocoded cases (historic=1 to include past dates)
   const fetchCases = useCallback(() => {
-    const params: Record<string, string> = { limit: '50000' }
+    const params: Record<string, string> = { limit: '50000', historic: '1' }
     if (estatFilter !== 'tots') params.estat = estatFilter
 
     const key = JSON.stringify(params)
@@ -91,6 +108,17 @@ export default function MapaPage() {
     lastFetchKey.current = ''
     fetchCases()
   }, [fetchCases])
+
+  // Derived: geocoding quality stats
+  const geoStats = useMemo(() => {
+    let exact = 0, street = 0, city = 0
+    for (const c of cases) {
+      if (c.geocodat === 1) exact++
+      else if (c.geocodat === 2) street++
+      else city++
+    }
+    return { exact, street, city }
+  }, [cases])
 
   // Derived: group real cases by province for ranking
   const provinciaStats = useMemo(() => {
@@ -120,6 +148,14 @@ export default function MapaPage() {
     return m[estat] || estat
   }
 
+  function getMarkerIcon(c: MapPointCas) {
+    // City-level geocoding (geocodat=3) — use ring marker to show it's approximate
+    if (c.geocodat === 3) return caseIconCityLevel
+    if (c.estat === 'imminent') return caseIconImminent
+    if (c.estat === 'programat') return caseIconProgramat
+    return caseIconExecutat
+  }
+
   if (loading) {
     return (
       <div className="loading">
@@ -128,6 +164,8 @@ export default function MapaPage() {
       </div>
     )
   }
+
+  const panelClass = `mapa-overlay mapa-overlay--${panelState}`
 
   return (
     <div className="mapa-page">
@@ -156,7 +194,6 @@ export default function MapaPage() {
             disableClusteringAtZoom={17}
           >
             {cases.map(c => {
-              // Build Google Maps-style address: "C/ Nom Via, 5, 3º A, 08001 Localitat, Provincia"
               const streetParts: string[] = []
               if (c.tipus_via && c.nom_via) {
                 const abrev: Record<string, string> = {
@@ -175,10 +212,8 @@ export default function MapaPage() {
               if (c.pis && c.porta) streetParts.push(`${c.pis} ${c.porta}`)
               else if (c.pis) streetParts.push(c.pis)
               else if (c.porta) streetParts.push(c.porta)
-
               const street = streetParts.join(', ')
 
-              // Capitalize city name properly
               const ciutat = c.ciutat
                 ? c.ciutat.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ')
                 : ''
@@ -188,11 +223,9 @@ export default function MapaPage() {
               if (c.provincia && c.provincia !== ciutat) cityParts.push(c.provincia)
               const cityLine = cityParts.join(', ')
 
-              // Keep street and city as separate lines for visual clarity
               const addressLine1 = street || c.adreca_original || ''
               const addressLine2 = cityLine
 
-              // Format date: "3 feb 2025"
               const dp = c.data_desnonament?.split('-')
               const mesos = ['gen', 'feb', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'oct', 'nov', 'des']
               const dateStr = dp && dp.length === 3
@@ -203,9 +236,9 @@ export default function MapaPage() {
               <Marker
                 key={c.id}
                 position={[c.latitud, c.longitud]}
-                icon={c.estat === 'imminent' ? caseIconImminent : caseIconProgramat}
+                icon={getMarkerIcon(c)}
               >
-                <Popup maxWidth={300} minWidth={220} className="mobile-popup" autoPanPaddingTopLeft={[380, 10]}>
+                <Popup maxWidth={280} minWidth={200} className="mobile-popup">
                   <div className="map-popup rich">
                     <div className="popup-top-row">
                       <span className={`popup-estat-badge ${c.estat}`}>{estatLabel(c.estat)}</span>
@@ -214,22 +247,25 @@ export default function MapaPage() {
                     <div className="popup-address-full">
                       <div className="popup-address-street">{addressLine1}</div>
                       {addressLine2 && <div className="popup-address-city">{addressLine2}</div>}
+                      {c.geocodat === 3 && (
+                        <div className="popup-approx-location">
+                          <span className="popup-detail-icon">{'\u26A0\uFE0F'}</span>
+                          <span>{t('popup_approx_location')}</span>
+                        </div>
+                      )}
                     </div>
-                    {/* Motiu del desnonament — context social */}
                     {c.tipus_procediment && (
                       <div className="popup-detail-row">
                         <span className="popup-detail-icon">{'\u2696\uFE0F'}</span>
                         <span>{t(`popup_motiu_${c.tipus_procediment}` as any) || c.tipus_procediment}</span>
                       </div>
                     )}
-                    {/* Residència habitual */}
                     {c.vivenda_habitual === 1 && (
                       <div className="popup-detail-row">
                         <span className="popup-detail-icon">{'\uD83C\uDFE0'}</span>
                         <span>{t('popup_residencia_habitual')}</span>
                       </div>
                     )}
-                    {/* Jutjat que executa */}
                     {c.jutjat && (
                       <div className="popup-detail-row">
                         <span className="popup-detail-icon">{'\uD83C\uDFDB\uFE0F'}</span>
@@ -257,18 +293,57 @@ export default function MapaPage() {
         )}
       </div>
 
-      {/* Stats overlay — sliding drawer with attached chevron */}
-      <div className={`mapa-overlay ${panelVisible ? '' : 'collapsed'}`}>
+      {/* Floating button to reopen panel when hidden */}
+      {panelState === 'hidden' && (
+        <button
+          className="panel-reopen-fab"
+          onClick={() => setPanelState('minimized')}
+          aria-label={t('popup_toggle_panel')}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
+        </button>
+      )}
+
+      {/* Stats overlay — desktop: side panel, mobile: bottom sheet */}
+      <div className={panelClass}>
+        {/* Mobile handle bar + close */}
+        <div className="panel-handle-bar">
+          <button
+            className="panel-handle"
+            onClick={() => setPanelState(s => s === 'expanded' ? 'minimized' : 'expanded')}
+            aria-label={panelState === 'expanded' ? t('popup_hide_panel') : t('popup_toggle_panel')}
+          >
+            <span className="handle-grip" />
+          </button>
+          <button
+            className="panel-close-btn"
+            onClick={() => setPanelState('hidden')}
+            aria-label="Close"
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
+          </button>
+        </div>
+
+        {/* Desktop chevron toggle */}
         <button
           className="panel-chevron-tab"
-          onClick={() => setPanelVisible(v => !v)}
-          title={panelVisible ? t('popup_hide_panel') : t('popup_toggle_panel')}
-          aria-label={panelVisible ? t('popup_hide_panel') : t('popup_toggle_panel')}
+          onClick={() => setPanelState(s => s === 'hidden' ? 'expanded' : 'hidden')}
+          title={panelState === 'expanded' ? t('popup_hide_panel') : t('popup_toggle_panel')}
+          aria-label={panelState === 'expanded' ? t('popup_hide_panel') : t('popup_toggle_panel')}
         >
           <svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M8 2L2 8L8 14" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </button>
+
+        {/* Minimized bar (mobile only) — just the count */}
+        <div className="panel-mini-bar" onClick={() => setPanelState('expanded')}>
+          <span className="mini-bar-count">{cases.length.toLocaleString()}</span>
+          <span className="mini-bar-label">{t('map_visible_cases')}</span>
+          <svg className="mini-bar-expand" width="12" height="12" viewBox="0 0 12 12"><path d="M2 8l4-4 4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+        </div>
+
+        {/* Full panel content */}
         <div className="stats-panel">
           <h2>{t('map_title')}</h2>
 
@@ -297,36 +372,57 @@ export default function MapaPage() {
           <div className="ine-summary">
             <div className="stat-item">
               <div className="stat-value imminent">
-                {totalCount > 0 ? totalCount.toLocaleString() : cases.length.toLocaleString()}
+                {cases.length.toLocaleString()}
               </div>
               <div className="stat-label">
-                {t('map_visible_cases')} (BOE)
+                {t('map_visible_cases')}
               </div>
             </div>
           </div>
 
-          {/* Top 5 hotspots by real BOE cases */}
-          <div className="overlay-ranking">
-            <h3>{t('map_hotspots')}</h3>
-            {provinciaStats.slice(0, 5).map((p, i) => (
-              <button
-                key={p.provincia}
-                className="overlay-rank-item"
-                onClick={() =>
-                  setFlyTarget(
-                    L.latLngBounds(
-                      [p.lat - 0.5, p.lng - 0.8],
-                      [p.lat + 0.5, p.lng + 0.8],
-                    ),
-                  )
-                }
-              >
-                <span className="overlay-rank-num">{i + 1}</span>
-                <span className="overlay-rank-name">{p.provincia}</span>
-                <span className="overlay-rank-val">{p.count.toLocaleString()}</span>
-              </button>
-            ))}
+          {/* Geocoding quality indicator */}
+          <div className="geo-quality">
+            <div className="geo-quality-row">
+              <span className="geo-dot geo-exact" />
+              <span className="geo-label">{t('geo_exact')}</span>
+              <span className="geo-count">{geoStats.exact.toLocaleString()}</span>
+            </div>
+            <div className="geo-quality-row">
+              <span className="geo-dot geo-street" />
+              <span className="geo-label">{t('geo_street')}</span>
+              <span className="geo-count">{geoStats.street.toLocaleString()}</span>
+            </div>
+            <div className="geo-quality-row">
+              <span className="geo-dot geo-city" />
+              <span className="geo-label">{t('geo_city')}</span>
+              <span className="geo-count">{geoStats.city.toLocaleString()}</span>
+            </div>
           </div>
+
+          {/* Top 5 hotspots by real BOE cases */}
+          {provinciaStats.length > 0 && (
+            <div className="overlay-ranking">
+              <h3>{t('map_hotspots')}</h3>
+              {provinciaStats.slice(0, 5).map((p, i) => (
+                <button
+                  key={p.provincia}
+                  className="overlay-rank-item"
+                  onClick={() =>
+                    setFlyTarget(
+                      L.latLngBounds(
+                        [p.lat - 0.5, p.lng - 0.8],
+                        [p.lat + 0.5, p.lng + 0.8],
+                      ),
+                    )
+                  }
+                >
+                  <span className="overlay-rank-num">{i + 1}</span>
+                  <span className="overlay-rank-name">{p.provincia}</span>
+                  <span className="overlay-rank-val">{p.count.toLocaleString()}</span>
+                </button>
+              ))}
+            </div>
+          )}
 
           <Link to="/estadistiques" className="overlay-cta">
             {t('stats_see_all')}

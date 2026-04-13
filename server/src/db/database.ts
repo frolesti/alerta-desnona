@@ -58,7 +58,7 @@ function createTables(): void {
       -- Coordenades (geocodificades)
       latitud REAL,
       longitud REAL,
-      geocodat INTEGER NOT NULL DEFAULT 0,  -- 0=no, 1=cadastre, 2=nominatim
+      geocodat INTEGER NOT NULL DEFAULT 0,  -- 0=no, 1=cadastre(exact), 2=street-level, 3=city-level, -1=error
 
       -- Referència cadastral (clau per geocodificació precisa)
       ref_catastral TEXT,

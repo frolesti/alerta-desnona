@@ -160,17 +160,19 @@ desnonamentRoutes.get('/mapa', (req: Request, res: Response) => {
 
     const punts = db.prepare(sql).all(...params) as any[];
 
-    // Jitter: city-level geocoded points (geocodat=2) share exact same coords.
-    // Add a small random offset (~0.005° ≈ 500m) so they spread when zooming in.
+    // Jitter: city-level geocoded points (geocodat=2 or 3) share exact same coords.
+    // Use a capped golden-angle spiral so markers spread but never exceed ~200m.
     const seen = new Map<string, number>();
+    const MAX_JITTER = 0.002; // ~220m max offset (safe, never bleeds into other cities)
     for (const p of punts) {
-      if (p.geocodat === 2) {
+      if (p.geocodat >= 2) {
         const key = `${p.latitud},${p.longitud}`;
         const count = seen.get(key) || 0;
         seen.set(key, count + 1);
-        // Spiral pattern: angle based on index, radius grows slowly
+        // Spiral pattern: angle based on index, radius grows slowly but is capped
         const angle = count * 2.399963; // golden angle in radians
-        const radius = 0.003 * Math.sqrt(count + 1); // ~300m growing outward
+        const rawRadius = 0.0005 * Math.sqrt(count + 1); // tighter base radius
+        const radius = Math.min(rawRadius, MAX_JITTER); // hard cap at ~200m
         p.latitud = p.latitud + radius * Math.cos(angle);
         p.longitud = p.longitud + radius * Math.sin(angle);
       }
