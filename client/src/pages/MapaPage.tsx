@@ -76,7 +76,6 @@ type PanelState = 'expanded' | 'minimized' | 'hidden'
 
 export default function MapaPage() {
   const [cases, setCases] = useState<MapPointCas[]>([])
-  const [totalCount, setTotalCount] = useState(0)
   const [loading, setLoading] = useState(true)
   const [casesLoading, setCasesLoading] = useState(false)
   const [estatFilter, setEstatFilter] = useState<EstatFilter>('tots')
@@ -98,7 +97,6 @@ export default function MapaPage() {
     getCasosMap(params)
       .then(res => {
         if (res.ok && res.data) setCases(res.data)
-        if (res.totalCount != null) setTotalCount(res.totalCount)
       })
       .catch(console.error)
       .finally(() => { setCasesLoading(false); setLoading(false) })
