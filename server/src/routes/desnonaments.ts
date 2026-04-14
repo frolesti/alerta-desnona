@@ -117,12 +117,14 @@ desnonamentRoutes.get('/mapa', (req: Request, res: Response) => {
     const conditions: string[] = ['d.duplicat_de IS NULL', 'a.latitud IS NOT NULL'];
     const params: any[] = [];
 
-    if (estat) {
+    if (estat && estat !== 'tots') {
       conditions.push('d.estat = ?');
       params.push(estat);
-    } else {
+    } else if (historic !== '1') {
+      // Sense historic, per defecte només programat/imminent
       conditions.push("d.estat IN ('programat', 'imminent')");
     }
+    // Si historic=1 i estat='tots' (o absent) → no filtrem per estat: mostrem TOT
 
     // Per defecte el mapa només mostra desnonaments futurs (a partir d'avui).
     // Passa ?historic=1 per veure-ho tot (estadístiques, etc.)
@@ -181,10 +183,10 @@ desnonamentRoutes.get('/mapa', (req: Request, res: Response) => {
     // Total count for stats (same date filter)
     const countConditions: string[] = ['d.duplicat_de IS NULL'];
     const countParams: any[] = [];
-    if (estat) {
+    if (estat && estat !== 'tots') {
       countConditions.push('d.estat = ?');
       countParams.push(estat);
-    } else {
+    } else if (historic !== '1') {
       countConditions.push("d.estat IN ('programat', 'imminent')");
     }
     if (historic !== '1') {
