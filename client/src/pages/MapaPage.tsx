@@ -107,17 +107,6 @@ export default function MapaPage() {
     fetchCases()
   }, [fetchCases])
 
-  // Derived: geocoding quality stats
-  const geoStats = useMemo(() => {
-    let exact = 0, street = 0, city = 0
-    for (const c of cases) {
-      if (c.geocodat === 1) exact++
-      else if (c.geocodat === 2) street++
-      else city++
-    }
-    return { exact, street, city }
-  }, [cases])
-
   // Derived: group real cases by province for ranking
   const provinciaStats = useMemo(() => {
     const map = new Map<string, { count: number; lat: number; lng: number }>()
@@ -367,34 +356,9 @@ export default function MapaPage() {
             </button>
           </div>
 
-          <div className="ine-summary">
-            <div className="stat-item">
-              <div className="stat-value imminent">
-                {cases.length.toLocaleString()}
-              </div>
-              <div className="stat-label">
-                {t('map_visible_cases')}
-              </div>
-            </div>
-          </div>
-
-          {/* Geocoding quality indicator */}
-          <div className="geo-quality">
-            <div className="geo-quality-row">
-              <span className="geo-dot geo-exact" />
-              <span className="geo-label">{t('geo_exact')}</span>
-              <span className="geo-count">{geoStats.exact.toLocaleString()}</span>
-            </div>
-            <div className="geo-quality-row">
-              <span className="geo-dot geo-street" />
-              <span className="geo-label">{t('geo_street')}</span>
-              <span className="geo-count">{geoStats.street.toLocaleString()}</span>
-            </div>
-            <div className="geo-quality-row">
-              <span className="geo-dot geo-city" />
-              <span className="geo-label">{t('geo_city')}</span>
-              <span className="geo-count">{geoStats.city.toLocaleString()}</span>
-            </div>
+          <div className="map-case-count">
+            <span className="map-case-number">{cases.length.toLocaleString()}</span>
+            <span className="map-case-label">{t('map_visible_cases')}</span>
           </div>
 
           {/* Top 5 hotspots by real BOE cases */}

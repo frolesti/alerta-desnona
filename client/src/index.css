@@ -132,6 +132,12 @@
 [data-theme="light"] .stats-panel h2 {
   color: #475569;
 }
+[data-theme="light"] .map-case-count {
+  background: rgba(0, 0, 0, 0.03);
+}
+[data-theme="light"] .map-case-label {
+  color: #64748b;
+}
 [data-theme="light"] .map-estat-filter button {
   border-color: rgba(0, 0, 0, 0.12);
   color: #64748b;
@@ -635,47 +641,28 @@ a:hover {
   font-style: italic;
 }
 
-/* Geocoding quality indicator in stats panel */
-.geo-quality {
+/* Case count in stats panel */
+.map-case-count {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding: 8px 12px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: var(--radius);
-  font-size: 0.8em;
-  margin-bottom: var(--space-sm);
-}
-.geo-quality-row {
-  display: flex;
   align-items: center;
-  gap: 8px;
+  padding: 12px 0;
+  margin-bottom: var(--space-sm);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.04);
 }
-.geo-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
+.map-case-number {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  line-height: 1;
 }
-.geo-dot.geo-exact {
-  background: #22c55e;
-}
-.geo-dot.geo-street {
-  background: #f59e0b;
-}
-.geo-dot.geo-city {
-  background: transparent;
-  border: 2px solid #94a3b8;
-  width: 6px;
-  height: 6px;
-}
-.geo-label {
-  flex: 1;
+.map-case-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
   color: var(--color-text-muted);
-}
-.geo-count {
-  font-weight: 600;
-  color: var(--color-text);
+  margin-top: 2px;
 }
 
 .popup-jutjat-text {
