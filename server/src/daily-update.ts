@@ -178,15 +178,28 @@ async function main() {
   // Init DB
   initDB();
 
+  // Mode test: limita el primer scrape a un rang petit per validar qualitat
+  // abans d'enfrontar la quota Gemini i les hores de geocoding.
+  // Activa amb env var BOOTSTRAP_LIMIT=small (rang BOE d'~100 IDs, sense TEU).
+  const TEST_MODE = process.env.BOOTSTRAP_LIMIT === 'small';
+  if (TEST_MODE) {
+    console.log('🧪 BOOTSTRAP_LIMIT=small — primera càrrega reduïda per validar qualitat\n');
+  }
+
   // ── Fase 1: Scrape BOE — subhastes judicials (execucions hipotecàries) ──
   const currentYear = today.getFullYear();
+  const fase1Args = TEST_MODE
+    ? `--year ${currentYear} --prefix JA --from 259900 --to 260000`
+    : `--year ${currentYear} --prefix ALL`;
   runStep(
     'Fase 1: Scrape BOE — subhastes judicials (exec. hipotecàries)',
-    buildCommand('fetch-subastas-by-id', `--year ${currentYear} --prefix ALL`),
+    buildCommand('fetch-subastas-by-id', fase1Args),
   );
 
   // ── Fase 2: Scrape TEU — edictes de desnonaments (impagaments + ocupació) ──
-  if (!SKIP_TEU) {
+  if (TEST_MODE) {
+    console.log('\n⏭️  Fase 2: TEU — omesa en mode test petit');
+  } else if (!SKIP_TEU) {
     runStep(
       'Fase 2: Scrape TEU — edictes desnonaments (impago + ocupació)',
       buildCommand('fetch-teu-desnonaments', '--days 1'),
@@ -205,6 +218,19 @@ async function main() {
   runStep(
     'Fase 4: Geocodificar adreces noves',
     buildCommand('geocode-per-ciutat'),
+  );
+
+  // ── Fase 4.5: Dedup intel·ligent (rules + LLM) ──
+  runStep(
+    'Fase 4.5: Detecció de duplicats (fingerprint + IA)',
+    buildCommand('dedup-desnonaments'),
+  );
+
+  // ── Fase 4.6: Purga casos sense ubicació precisa ──
+  // Mandat: l'app només té sentit si situa cada cas al mapa amb precisió.
+  runStep(
+    'Fase 4.6: Purga casos sense ubicació precisa al mapa',
+    buildCommand('purge-imprecise'),
   );
 
   // ── Fase 5: INE (només dilluns) ──

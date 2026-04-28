@@ -1,65 +1,28 @@
 /**
- * GEOCODE PER CIUTAT: Assigna coordenades a totes les adreces no geocodificades.
- * 
- * Estratègia en cascada (de més precís a menys):
+ * GEOCODE — Assigna coordenades EXACTES a les adreces.
+ *
+ * NOMÉS dues estratègies, totes dues amb precisió de portal/carrer:
  *   1. Cadastre API → coordenades EXACTES de l'edifici (geocodat=1)
  *   2. Nominatim structured search → carrer (geocodat=2)
- *   3. Photon city-level → centre de ciutat (geocodat=3)
+ *
+ * NO fa fallback a centroide de ciutat. Si una adreça no es pot situar
+ * amb precisió, es queda amb geocodat=0 i serà purgada més tard
+ * (purge-imprecise.ts) perquè no aporta res a l'objectiu de l'app.
  */
 
 import 'dotenv/config';
 import { initDB, getDB } from './db/database';
 import { geocodeCadastre, geocodeNominatim, type AdrecaParsejada } from './services/adreca';
 
-const CONCURRENCY = 3;
-const DELAY_MS = 200;
 const NOMINATIM_DELAY = 1100;
 const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
-
-async function geocodeCity(localitat: string, provincia: string): Promise<{ lat: number; lng: number } | null> {
-  try {
-    const q = `${localitat}, ${provincia}, Spain`;
-    const res = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=1`, {
-      signal: AbortSignal.timeout(8000),
-    });
-    if (res.ok) {
-      const data = await res.json() as any;
-      if (data.features?.length > 0) {
-        const [lng, lat] = data.features[0].geometry.coordinates;
-        if (!isNaN(lat) && !isNaN(lng) && lat >= 27 && lat <= 44 && lng >= -19 && lng <= 5) {
-          return { lat: Math.round(lat * 1e6) / 1e6, lng: Math.round(lng * 1e6) / 1e6 };
-        }
-      }
-    }
-  } catch { /* timeout */ }
-
-  try {
-    await sleep(NOMINATIM_DELAY);
-    const params = new URLSearchParams({ city: localitat, state: provincia, country: 'Spain', format: 'json', limit: '1', countrycodes: 'es' });
-    const res = await fetch(`https://nominatim.openstreetmap.org/search?${params}`, {
-      headers: { 'User-Agent': 'AlertaDesnona/2.0', Accept: 'application/json' },
-      signal: AbortSignal.timeout(8000),
-    });
-    if (res.ok) {
-      const data = await res.json() as Array<{ lat: string; lon: string }>;
-      if (data.length > 0) {
-        const lat = parseFloat(data[0].lat);
-        const lng = parseFloat(data[0].lon);
-        if (!isNaN(lat) && !isNaN(lng) && lat >= 27 && lat <= 44 && lng >= -19 && lng <= 5) {
-          return { lat: Math.round(lat * 1e6) / 1e6, lng: Math.round(lng * 1e6) / 1e6 };
-        }
-      }
-    }
-  } catch { /* timeout */ }
-
-  return null;
-}
 
 async function main() {
   initDB();
   const db = getDB();
 
-  console.log('🗺️  GEOCODE — CASCADA (Cadastre → Nominatim → Ciutat)\n');
+  console.log('🗺️  GEOCODE — CASCADA PRECISA (Cadastre → Nominatim)\n');
+  console.log('   Fase C (city-level) eliminada: ja no es geolocalitzen casos amb precisió de ciutat.\n');
 
   // ── Phase A: Cadastre for addresses with ref_catastral ──
   const cadastreAddrs = db.prepare(`
@@ -113,60 +76,26 @@ async function main() {
     console.log(`  ✅ Nominatim carrer: ${okB}/${streetAddrs.length}\n`);
   }
 
-  // ── Phase C: City-level fallback for remaining ──
-  const cities = db.prepare(`
-    SELECT DISTINCT localitat, provincia, COUNT(*) as n
-    FROM adreces
-    WHERE geocodat = 0 AND localitat IS NOT NULL
-    GROUP BY localitat, provincia
-    ORDER BY n DESC
-  `).all() as Array<{ localitat: string; provincia: string; n: number }>;
-
-  if (cities.length > 0) {
-    const totalAddresses = cities.reduce((s, c) => s + c.n, 0);
-    console.log(`🏙️  Phase C: ${cities.length} ciutats → ${totalAddresses} adreces (city-level)`);
-
-    const updateCity = db.prepare(`
-      UPDATE adreces SET latitud = ?, longitud = ?, geocodat = 3, actualitzat_el = datetime('now')
-      WHERE localitat = ? AND provincia = ? AND geocodat = 0
-    `);
-
-    let geoOk = 0, addrOk = 0;
-    let idx = 0;
-
-    async function worker() {
-      while (true) {
-        const myIdx = idx++;
-        if (myIdx >= cities.length) break;
-        const c = cities[myIdx];
-        const coords = await geocodeCity(c.localitat, c.provincia);
-        if (coords) {
-          const result = updateCity.run(coords.lat, coords.lng, c.localitat, c.provincia);
-          addrOk += result.changes;
-          geoOk++;
-        }
-        await sleep(DELAY_MS);
-      }
-    }
-
-    await Promise.all(Array.from({ length: Math.min(CONCURRENCY, cities.length) }, () => worker()));
-    console.log(`  ✅ Ciutat: ${geoOk}/${cities.length} ciutats (${addrOk} adreces)\n`);
-  }
+  // ── Phase C eliminada ──
+  // Anteriorment es geocodificaven les adreces restants amb el centroide de la ciutat
+  // (geocodat=3). Això generava clústers ficticis al mapa (tots els casos d'una ciutat
+  // apareixien al mateix punt). Ara no es fa: les adreces sense precisió de carrer
+  // queden amb geocodat=0 i seran eliminades per `purge-imprecise.ts`.
 
   // ── Summary ──
   const stats = db.prepare(`
     SELECT geocodat, COUNT(*) as n FROM adreces GROUP BY geocodat ORDER BY geocodat
   `).all() as any[];
   const total = (db.prepare('SELECT COUNT(*) as n FROM adreces').get() as any).n;
-  const onMap = (db.prepare('SELECT COUNT(*) as n FROM adreces WHERE latitud IS NOT NULL').get() as any).n;
+  const onMap = (db.prepare('SELECT COUNT(*) as n FROM adreces WHERE latitud IS NOT NULL AND geocodat IN (1,2)').get() as any).n;
 
   console.log('═'.repeat(50));
   console.log('📊 RESUM GEOCODIFICACIÓ');
   for (const s of stats) {
-    const label = s.geocodat === 1 ? 'cadastre' : s.geocodat === 2 ? 'carrer' : s.geocodat === 3 ? 'ciutat' : s.geocodat === 0 ? 'sense' : `other(${s.geocodat})`;
+    const label = s.geocodat === 1 ? 'cadastre' : s.geocodat === 2 ? 'carrer' : s.geocodat === 0 ? 'sense' : `other(${s.geocodat})`;
     console.log(`  geocodat=${s.geocodat} (${label}): ${s.n}`);
   }
-  console.log(`  🗺️  TOTAL al mapa: ${onMap}/${total} (${((onMap / total) * 100).toFixed(1)}%)`);
+  console.log(`  🗺️  TOTAL al mapa (precís): ${onMap}/${total} (${total > 0 ? ((onMap / total) * 100).toFixed(1) : '0.0'}%)`);
   console.log('═'.repeat(50));
 }
 
