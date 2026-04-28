@@ -649,29 +649,6 @@ a:hover {
   opacity: 0.5;
 }
 
-/* city-level marker ring (geocodat=3) — hollow ring to show approximate location */
-.case-marker-ring {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: transparent;
-  border: 2px solid #94a3b8;
-  opacity: 0.6;
-  box-shadow: 0 0 4px rgba(148, 163, 184, 0.3);
-}
-
-/* Approximate location warning in popup */
-.popup-approx-location {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  margin-top: 4px;
-  font-size: 0.75em;
-  color: var(--color-text-muted);
-  opacity: 0.8;
-  font-style: italic;
-}
-
 /* Case count in stats panel */
 .map-case-count {
   display: flex;
@@ -694,6 +671,36 @@ a:hover {
   letter-spacing: 0.06em;
   color: var(--color-text-muted);
   margin-top: 2px;
+}
+
+/* Note about cases hidden from map (no precise address) */
+.map-omesos-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-bottom: var(--space-sm);
+  padding: 0.55rem 0.7rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(249, 115, 22, 0.18);
+  background: rgba(249, 115, 22, 0.07);
+  font-size: 0.72rem;
+  line-height: 1.35;
+  color: var(--color-text-secondary);
+  cursor: help;
+}
+.map-omesos-note strong {
+  color: var(--color-text);
+  font-weight: 700;
+}
+.map-omesos-icon {
+  flex-shrink: 0;
+  font-size: 0.95rem;
+  line-height: 1;
+  color: var(--color-primary);
+}
+[data-theme="light"] .map-omesos-note {
+  border-color: rgba(249, 115, 22, 0.3);
+  background: rgba(249, 115, 22, 0.08);
 }
 
 .popup-jutjat-text {

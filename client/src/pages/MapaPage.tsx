@@ -34,14 +34,6 @@ const caseIconExecutat = L.divIcon({
   iconAnchor: [4, 4],
 })
 
-// City-level markers (geocodat=3) — ring instead of solid dot
-const caseIconCityLevel = L.divIcon({
-  className: 'case-marker city-level',
-  html: '<div class="case-marker-ring"></div>',
-  iconSize: [10, 10],
-  iconAnchor: [5, 5],
-})
-
 type EstatFilter = 'tots' | 'imminent' | 'programat'
 
 /** Custom cluster icon — circle with count */
@@ -76,6 +68,7 @@ type PanelState = 'expanded' | 'minimized'
 
 export default function MapaPage() {
   const [cases, setCases] = useState<MapPointCas[]>([])
+  const [omesos, setOmesos] = useState(0)
   const [loading, setLoading] = useState(true)
   const [casesLoading, setCasesLoading] = useState(false)
   const [estatFilter, setEstatFilter] = useState<EstatFilter>('tots')
@@ -96,7 +89,10 @@ export default function MapaPage() {
     setCasesLoading(true)
     getCasosMap(params)
       .then(res => {
-        if (res.ok && res.data) setCases(res.data)
+        if (res.ok && res.data) {
+          setCases(res.data)
+          setOmesos(res.omesos ?? 0)
+        }
       })
       .catch(console.error)
       .finally(() => { setCasesLoading(false); setLoading(false) })
@@ -136,8 +132,6 @@ export default function MapaPage() {
   }
 
   function getMarkerIcon(c: MapPointCas) {
-    // City-level geocoding (geocodat=3) — use ring marker to show it's approximate
-    if (c.geocodat === 3) return caseIconCityLevel
     if (c.estat === 'imminent') return caseIconImminent
     if (c.estat === 'programat') return caseIconProgramat
     return caseIconExecutat
@@ -173,12 +167,12 @@ export default function MapaPage() {
           {/* ---- Real individual cases with clustering ---- */}
           <MarkerClusterGroup
             chunkedLoading
-            maxClusterRadius={60}
+            maxClusterRadius={45}
             zoomToBoundsOnClick={true}
             spiderfyOnMaxZoom={false}
             showCoverageOnHover={false}
             iconCreateFunction={createClusterIcon}
-            disableClusteringAtZoom={17}
+            removeOutsideVisibleBounds={true}
           >
             {cases.map(c => {
               const streetParts: string[] = []
@@ -234,12 +228,6 @@ export default function MapaPage() {
                     <div className="popup-address-full">
                       <div className="popup-address-street">{addressLine1}</div>
                       {addressLine2 && <div className="popup-address-city">{addressLine2}</div>}
-                      {c.geocodat === 3 && (
-                        <div className="popup-approx-location">
-                          <span className="popup-detail-icon">{'\u26A0\uFE0F'}</span>
-                          <span>{t('popup_approx_location')}</span>
-                        </div>
-                      )}
                     </div>
                     {c.tipus_procediment && (
                       <div className="popup-detail-row">
@@ -341,6 +329,17 @@ export default function MapaPage() {
             <span className="map-case-number">{cases.length.toLocaleString()}</span>
             <span className="map-case-label">{t('map_visible_cases')}</span>
           </div>
+
+          {omesos > 0 && (
+            <div className="map-omesos-note" title={t('map_omesos_tooltip')}>
+              <span className="map-omesos-icon" aria-hidden="true">ⓘ</span>
+              <span>
+                {t('map_omesos_prefix')}{' '}
+                <strong>{omesos.toLocaleString()}</strong>{' '}
+                {t('map_omesos_suffix')}
+              </span>
+            </div>
+          )}
 
           {/* Top 5 hotspots by real BOE cases */}
           {provinciaStats.length > 0 && (

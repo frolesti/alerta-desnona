@@ -22,6 +22,7 @@ export interface ApiResponse<T> {
   error?: string;
   total?: number;
   totalCount?: number;
+  omesos?: number;
   pagina?: number;
   limit?: number;
 }

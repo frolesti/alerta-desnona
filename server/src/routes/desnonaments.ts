@@ -125,6 +125,7 @@ desnonamentRoutes.get('/mapa', (req: Request, res: Response) => {
         JOIN adreces a ON d.adreca_id = a.id
         WHERE d.duplicat_de IS NULL
           AND a.latitud IS NOT NULL
+          AND a.geocodat <= 2
           AND d.estat IN ('programat', 'imminent')
           AND d.data_desnonament >= date('now', 'localtime')
       `).get() as any;
@@ -133,7 +134,14 @@ desnonamentRoutes.get('/mapa', (req: Request, res: Response) => {
       }
     }
 
-    const conditions: string[] = ['d.duplicat_de IS NULL', 'a.latitud IS NOT NULL'];
+    const conditions: string[] = [
+      'd.duplicat_de IS NULL',
+      'a.latitud IS NOT NULL',
+      // Només mostrem casos amb adreça precisa (carrer/número o portal exacte).
+      // geocodat=3 = només a nivell de ciutat → no es mostra al mapa per evitar
+      // marcadors engañosos al centroide del municipi.
+      'a.geocodat <= 2',
+    ];
     const params: any[] = [];
 
     if (hasExplicitEstat) {
@@ -181,23 +189,9 @@ desnonamentRoutes.get('/mapa', (req: Request, res: Response) => {
 
     const punts = db.prepare(sql).all(...params) as any[];
 
-    // Jitter: city-level geocoded points (geocodat=2 or 3) share exact same coords.
-    // Use a capped golden-angle spiral so markers spread but never exceed ~200m.
-    const seen = new Map<string, number>();
-    const MAX_JITTER = 0.002; // ~220m max offset (safe, never bleeds into other cities)
-    for (const p of punts) {
-      if (p.geocodat >= 2) {
-        const key = `${p.latitud},${p.longitud}`;
-        const count = seen.get(key) || 0;
-        seen.set(key, count + 1);
-        // Spiral pattern: angle based on index, radius grows slowly but is capped
-        const angle = count * 2.399963; // golden angle in radians
-        const rawRadius = 0.0005 * Math.sqrt(count + 1); // tighter base radius
-        const radius = Math.min(rawRadius, MAX_JITTER); // hard cap at ~200m
-        p.latitud = p.latitud + radius * Math.cos(angle);
-        p.longitud = p.longitud + radius * Math.sin(angle);
-      }
-    }
+    // No apliquem cap jitter: les coordenades retornades són les reals.
+    // Si diversos casos comparteixen exactament la mateixa lat/lng (mateix edifici),
+    // el client els mostra agrupats amb un nombre.
 
     // Total count for stats (same date filter)
     const countConditions: string[] = ['d.duplicat_de IS NULL'];
@@ -211,10 +205,21 @@ desnonamentRoutes.get('/mapa', (req: Request, res: Response) => {
     if (!effectiveHistoric) {
       countConditions.push("d.data_desnonament >= date('now', 'localtime')");
     }
-    const countSql = `SELECT COUNT(*) as c FROM desnonaments d WHERE ${countConditions.join(' AND ')}`;
-    const totalCount = (db.prepare(countSql).get(...countParams) as any).c;
+    const countSqlBase = `SELECT COUNT(*) as c FROM desnonaments d`;
+    const totalCount = (db.prepare(`${countSqlBase} WHERE ${countConditions.join(' AND ')}`).get(...countParams) as any).c;
 
-    res.json({ ok: true, data: punts, total: punts.length, totalCount });
+    // Quants casos no es mostren al mapa per manca d'adreça precisa
+    // (afegim el JOIN per poder filtrar per geocodat)
+    const omesosSql = `
+      SELECT COUNT(*) as c
+      FROM desnonaments d
+      LEFT JOIN adreces a ON d.adreca_id = a.id
+      WHERE ${countConditions.join(' AND ')}
+        AND (a.latitud IS NULL OR a.geocodat IS NULL OR a.geocodat > 2)
+    `;
+    const omesos = (db.prepare(omesosSql).get(...countParams) as any).c;
+
+    res.json({ ok: true, data: punts, total: punts.length, totalCount, omesos });
   } catch (error) {
     console.error('Error obtenint punts del mapa:', error);
     res.status(500).json({ ok: false, error: 'Error intern del servidor' });
