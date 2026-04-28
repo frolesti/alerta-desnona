@@ -41,26 +41,36 @@ const SKIP_TEU = args.includes('--skip-teu');
 const serverDir = path.resolve(__dirname, '..');
 
 // Detect if running in production (compiled JS) or development (tsx)
-const IS_PRODUCTION = __filename.endsWith('.js') && fs.existsSync(path.join(serverDir, 'dist'));
+const IS_PRODUCTION = __filename.endsWith('.js');
+
+// Locate the compiled scripts directory. In Docker the layout is
+// /app/dist/server/src/*.js (this file lives there), so sibling .js files
+// are next to __dirname. Locally during dev with tsx, scripts are sources.
+const COMPILED_DIR = __dirname;
 
 /**
  * Build the command to run a sub-script.
- * In production: `node dist/server/src/<script>.js`
+ * In production: `node <compiledDir>/<script>.js`
  * In development: `npx tsx src/<script>.ts`
  */
 function buildCommand(scriptName: string, extraArgs: string = ''): string {
   if (IS_PRODUCTION) {
-    // In production Docker image, compiled JS files are at dist/server/src/
-    const jsPath = path.join(serverDir, 'dist', 'server', 'src', `${scriptName}.js`);
+    const jsPath = path.join(COMPILED_DIR, `${scriptName}.js`);
     if (!fs.existsSync(jsPath)) {
-      // Fallback: might be at dist/src/ depending on build config
-      const altPath = path.join(serverDir, 'dist', 'src', `${scriptName}.js`);
-      if (fs.existsSync(altPath)) {
-        return `node ${altPath}${extraArgs ? ' ' + extraArgs : ''}`;
+      // Fallbacks for alternative build layouts
+      const candidates = [
+        path.join(serverDir, 'dist', 'server', 'src', `${scriptName}.js`),
+        path.join(serverDir, 'dist', 'src', `${scriptName}.js`),
+        path.join(serverDir, '..', 'dist', 'server', 'src', `${scriptName}.js`),
+      ];
+      for (const alt of candidates) {
+        if (fs.existsSync(alt)) {
+          return `node "${alt}"${extraArgs ? ' ' + extraArgs : ''}`;
+        }
       }
-      console.warn(`⚠️  Script no trobat: ${jsPath} ni ${altPath}`);
+      console.warn(`⚠️  Script no trobat: ${jsPath}`);
     }
-    return `node ${jsPath}${extraArgs ? ' ' + extraArgs : ''}`;
+    return `node "${jsPath}"${extraArgs ? ' ' + extraArgs : ''}`;
   }
   return `npx tsx src/${scriptName}.ts${extraArgs ? ' ' + extraArgs : ''}`;
 }

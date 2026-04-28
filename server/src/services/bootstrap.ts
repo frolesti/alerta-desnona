@@ -26,6 +26,8 @@ function resolveRuntimeRoot(): string {
     path.resolve(__dirname, '..'),
     path.resolve(__dirname, '../..'),
     path.resolve(__dirname, '../../..'),
+    path.resolve(__dirname, '../../../..'),
+    path.resolve(__dirname, '../../../../..'),
   ];
 
   for (const candidate of candidates) {
@@ -37,9 +39,22 @@ function resolveRuntimeRoot(): string {
   return path.resolve(__dirname, '../../..');
 }
 
+function resolveCompiledScript(runtimeRoot: string, scriptName: string): string | null {
+  const candidates = [
+    path.join(runtimeRoot, 'dist', 'server', 'src', `${scriptName}.js`),
+    path.join(runtimeRoot, 'dist', 'src', `${scriptName}.js`),
+    path.join(runtimeRoot, 'server', 'dist', 'server', 'src', `${scriptName}.js`),
+    path.join(runtimeRoot, 'server', 'dist', 'src', `${scriptName}.js`),
+  ];
+  for (const c of candidates) {
+    if (fs.existsSync(c)) return c;
+  }
+  return null;
+}
+
 function buildBootstrapCommand(runtimeRoot: string): { command: string; args: string[] } | null {
-  const compiledScript = path.join(runtimeRoot, 'dist', 'server', 'src', 'daily-update.js');
-  if (fs.existsSync(compiledScript)) {
+  const compiledScript = resolveCompiledScript(runtimeRoot, 'daily-update');
+  if (compiledScript) {
     return {
       command: process.execPath,
       args: [compiledScript],
