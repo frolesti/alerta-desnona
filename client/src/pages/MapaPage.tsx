@@ -72,7 +72,7 @@ function FlyController({ target }: { target: L.LatLngBounds | null }) {
   return null
 }
 
-type PanelState = 'expanded' | 'minimized' | 'hidden'
+type PanelState = 'expanded' | 'minimized'
 
 export default function MapaPage() {
   const [cases, setCases] = useState<MapPointCas[]>([])
@@ -280,59 +280,40 @@ export default function MapaPage() {
         )}
       </div>
 
-      {/* Floating button to reopen panel when hidden */}
-      {panelState === 'hidden' && (
-        <button
-          className="panel-reopen-fab"
-          onClick={() => setPanelState('minimized')}
-          aria-label={t('popup_toggle_panel')}
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
-        </button>
-      )}
-
       {/* Stats overlay — desktop: side panel, mobile: bottom sheet */}
       <div className={panelClass}>
-        {/* Mobile handle bar + close */}
-        <div className="panel-handle-bar">
-          <button
-            className="panel-handle"
-            onClick={() => setPanelState(s => s === 'expanded' ? 'minimized' : 'expanded')}
-            aria-label={panelState === 'expanded' ? t('popup_hide_panel') : t('popup_toggle_panel')}
-          >
-            <span className="handle-grip" />
-          </button>
-          <button
-            className="panel-close-btn"
-            onClick={() => setPanelState('hidden')}
-            aria-label="Close"
-          >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
-          </button>
-        </div>
-
-        {/* Desktop chevron toggle */}
+        {/* Minimized: a pill-style button to reopen the full panel (desktop + mobile) */}
         <button
-          className="panel-chevron-tab"
-          onClick={() => setPanelState(s => s === 'hidden' ? 'expanded' : 'hidden')}
-          title={panelState === 'expanded' ? t('popup_hide_panel') : t('popup_toggle_panel')}
-          aria-label={panelState === 'expanded' ? t('popup_hide_panel') : t('popup_toggle_panel')}
+          type="button"
+          className="panel-mini-bar"
+          onClick={() => setPanelState('expanded')}
+          aria-label={t('popup_toggle_panel')}
         >
-          <svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M8 2L2 8L8 14" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
+          <span className="mini-bar-icon" aria-hidden="true">📊</span>
+          <span className="mini-bar-content">
+            <span className="mini-bar-title">{t('map_title')}</span>
+            <span className="mini-bar-meta">
+              <span className="mini-bar-count">{cases.length.toLocaleString()}</span>
+              <span className="mini-bar-label">{t('map_visible_cases')}</span>
+            </span>
+          </span>
+          <svg className="mini-bar-expand" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 8l4-4 4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
         </button>
-
-        {/* Minimized bar (mobile only) — just the count */}
-        <div className="panel-mini-bar" onClick={() => setPanelState('expanded')}>
-          <span className="mini-bar-count">{cases.length.toLocaleString()}</span>
-          <span className="mini-bar-label">{t('map_visible_cases')}</span>
-          <svg className="mini-bar-expand" width="12" height="12" viewBox="0 0 12 12"><path d="M2 8l4-4 4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-        </div>
 
         {/* Full panel content */}
         <div className="stats-panel">
-          <h2>{t('map_title')}</h2>
+          <div className="stats-panel-header">
+            <h2>{t('map_title')}</h2>
+            <button
+              type="button"
+              className="panel-minimize-btn"
+              onClick={() => setPanelState('minimized')}
+              title={t('popup_hide_panel')}
+              aria-label={t('popup_hide_panel')}
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
+            </button>
+          </div>
 
           {/* Estat filter */}
           <div className="map-estat-filter">

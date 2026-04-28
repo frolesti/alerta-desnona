@@ -11,6 +11,7 @@ import { startCronJobs } from './services/cron';
 import { initPush, getVapidPublicKey } from './services/push';
 import { initEmail } from './services/email';
 import { initFCM } from './services/fcm';
+import { getBootstrapStatus, startInitialBootstrap } from './services/bootstrap';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -30,7 +31,11 @@ app.use('/api/estadistiques', estadistiquesRoutes);
 
 // Health check
 app.get('/api/health', (_req, res) => {
-  res.json({ ok: true, timestamp: new Date().toISOString() });
+  res.json({
+    ok: true,
+    timestamp: new Date().toISOString(),
+    bootstrap: getBootstrapStatus(),
+  });
 });
 
 // VAPID public key (el client la necessita per subscriure's a push)
@@ -58,6 +63,7 @@ async function main() {
   initEmail();
   initFCM();
   startCronJobs();
+  startInitialBootstrap();
 
   app.listen(PORT, () => {
     console.log(`🏠 Alerta Desnona API escoltant al port ${PORT}`);
