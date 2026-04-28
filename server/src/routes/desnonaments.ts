@@ -114,13 +114,32 @@ desnonamentRoutes.get('/mapa', (req: Request, res: Response) => {
     const db = getDB();
     const { estat, limit, south, north, west, east, historic } = req.query;
 
+    const hasExplicitEstat = typeof estat === 'string' && estat.length > 0 && estat !== 'tots';
+    // Safety fallback: if "current" mode yields no upcoming points, serve historic points
+    // so production never appears empty due to stale/future-only data.
+    let effectiveHistoric = historic === '1';
+    if (!effectiveHistoric && !hasExplicitEstat) {
+      const upcomingCountRow = db.prepare(`
+        SELECT COUNT(*) as c
+        FROM desnonaments d
+        JOIN adreces a ON d.adreca_id = a.id
+        WHERE d.duplicat_de IS NULL
+          AND a.latitud IS NOT NULL
+          AND d.estat IN ('programat', 'imminent')
+          AND d.data_desnonament >= date('now', 'localtime')
+      `).get() as any;
+      if ((upcomingCountRow?.c || 0) === 0) {
+        effectiveHistoric = true;
+      }
+    }
+
     const conditions: string[] = ['d.duplicat_de IS NULL', 'a.latitud IS NOT NULL'];
     const params: any[] = [];
 
-    if (estat && estat !== 'tots') {
+    if (hasExplicitEstat) {
       conditions.push('d.estat = ?');
       params.push(estat);
-    } else if (historic !== '1') {
+    } else if (!effectiveHistoric) {
       // Sense historic, per defecte només programat/imminent
       conditions.push("d.estat IN ('programat', 'imminent')");
     }
@@ -128,7 +147,7 @@ desnonamentRoutes.get('/mapa', (req: Request, res: Response) => {
 
     // Per defecte el mapa només mostra desnonaments futurs (a partir d'avui).
     // Passa ?historic=1 per veure-ho tot (estadístiques, etc.)
-    if (historic !== '1') {
+    if (!effectiveHistoric) {
       conditions.push("d.data_desnonament >= date('now', 'localtime')");
     }
 
@@ -183,13 +202,13 @@ desnonamentRoutes.get('/mapa', (req: Request, res: Response) => {
     // Total count for stats (same date filter)
     const countConditions: string[] = ['d.duplicat_de IS NULL'];
     const countParams: any[] = [];
-    if (estat && estat !== 'tots') {
+    if (hasExplicitEstat) {
       countConditions.push('d.estat = ?');
       countParams.push(estat);
-    } else if (historic !== '1') {
+    } else if (!effectiveHistoric) {
       countConditions.push("d.estat IN ('programat', 'imminent')");
     }
-    if (historic !== '1') {
+    if (!effectiveHistoric) {
       countConditions.push("d.data_desnonament >= date('now', 'localtime')");
     }
     const countSql = `SELECT COUNT(*) as c FROM desnonaments d WHERE ${countConditions.join(' AND ')}`;
