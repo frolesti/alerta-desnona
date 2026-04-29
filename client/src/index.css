@@ -162,7 +162,12 @@
   color: #64748b;
 }
 [data-theme="light"] .overlay-cta {
-  color: #ea580c;
+  color: #fff;
+  background: #ea580c;
+  box-shadow: 0 1px 3px rgba(234, 88, 12, 0.35);
+}
+[data-theme="light"] .overlay-cta:hover {
+  background: #c2410c;
 }
 
 [data-theme="light"] .desnonament-card {
@@ -2355,12 +2360,14 @@ a:hover {
   margin-top: var(--space-md);
   padding: var(--space-sm) var(--space-md);
   background: var(--color-primary);
-  color: #fff;
+  color: #fff !important;
   border-radius: var(--radius-md);
   text-decoration: none;
-  font-weight: 600;
-  font-size: 0.85rem;
-  transition: background 0.2s;
+  font-weight: 700;
+  font-size: 0.9rem;
+  letter-spacing: 0.01em;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.15);
+  transition: background 0.2s, transform 0.1s;
 }
 
 .overlay-cta:hover {

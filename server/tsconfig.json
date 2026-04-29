@@ -16,8 +16,7 @@
     "sourceMap": true,
     "paths": {
       "@shared/*": ["../shared/*"]
-    },
-    "baseUrl": "."
+    }
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
