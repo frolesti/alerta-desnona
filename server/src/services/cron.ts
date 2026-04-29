@@ -83,7 +83,7 @@ function createNotificationsForImminent(): void {
         WHERE s.activa = 1
         AND (
           (s.tipus = 'provincia' AND s.valor = ?)
-          OR (s.tipus = 'comunitat' AND s.valor = ?)
+          OR (s.tipus = 'comunitat' AND (s.valor = ? OR s.valor = 'totes'))
         )
       `).all(d.provincia, d.comunitat_autonoma) as any[];
 

@@ -28,19 +28,19 @@ export default function InfoPage() {
         <p>{t('info_types_intro')}</p>
 
         <div className="info-card">
-          <h3>🏦 {t('info_type_hipotecaria_title')}</h3>
+          <h3>{t('info_type_hipotecaria_title')}</h3>
           <p>{t('info_type_hipotecaria_desc')}</p>
         </div>
         <div className="info-card">
-          <h3>🏠 {t('info_type_lloguer_title')}</h3>
+          <h3>{t('info_type_lloguer_title')}</h3>
           <p>{t('info_type_lloguer_desc')}</p>
         </div>
         <div className="info-card">
-          <h3>🔑 {t('info_type_ocupacio_title')}</h3>
+          <h3>{t('info_type_ocupacio_title')}</h3>
           <p>{t('info_type_ocupacio_desc')}</p>
         </div>
         <div className="info-card">
-          <h3>📋 {t('info_type_finalitzacio_title')}</h3>
+          <h3>{t('info_type_finalitzacio_title')}</h3>
           <p>{t('info_type_finalitzacio_desc')}</p>
         </div>
       </div>
@@ -62,13 +62,13 @@ export default function InfoPage() {
         <h2>{t('info_rights_title')}</h2>
         <p>{t('info_rights_intro')}</p>
         <ul>
-          <li>✅ {t('info_right_1')}</li>
-          <li>✅ {t('info_right_2')}</li>
-          <li>✅ {t('info_right_3')}</li>
-          <li>✅ {t('info_right_4')}</li>
-          <li>✅ {t('info_right_5')}</li>
-          <li>✅ {t('info_right_6')}</li>
-          <li>✅ {t('info_right_7')}</li>
+          <li>{t('info_right_1')}</li>
+          <li>{t('info_right_2')}</li>
+          <li>{t('info_right_3')}</li>
+          <li>{t('info_right_4')}</li>
+          <li>{t('info_right_5')}</li>
+          <li>{t('info_right_6')}</li>
+          <li>{t('info_right_7')}</li>
         </ul>
       </div>
 
@@ -103,7 +103,7 @@ export default function InfoPage() {
         <p>{t('info_data_intro')}</p>
 
         <div className="info-card">
-          <h3>📊 {t('info_data_current_source_title')}</h3>
+          <h3>{t('info_data_current_source_title')}</h3>
           <p>{t('info_data_current_source_desc')}</p>
           <ul>
             <li><strong>Portal de Subastas del BOE</strong> — <a href="https://subastas.boe.es" target="_blank" rel="noopener noreferrer">subastas.boe.es</a></li>
@@ -112,7 +112,7 @@ export default function InfoPage() {
         </div>
 
         <div className="info-card">
-          <h3>📈 {t('info_data_stats_source_title')}</h3>
+          <h3>{t('info_data_stats_source_title')}</h3>
           <p>{t('info_data_stats_source_desc')}</p>
           <ul>
             <li><strong>INE — Instituto Nacional de Estadística</strong> — <a href="https://www.ine.es/jaxiT3/Tabla.htm?t=10743" target="_blank" rel="noopener noreferrer">Taula 10743</a></li>
@@ -120,7 +120,7 @@ export default function InfoPage() {
         </div>
 
         <div className="info-card">
-          <h3>⚠️ {t('info_data_limitations_title')}</h3>
+          <h3>{t('info_data_limitations_title')}</h3>
           <p>{t('info_data_limitations_desc')}</p>
           <ul>
             <li>{t('info_data_limitation_1')}</li>
@@ -130,7 +130,7 @@ export default function InfoPage() {
         </div>
 
         <div className="info-card">
-          <h3>🔮 {t('info_data_future_title')}</h3>
+          <h3>{t('info_data_future_title')}</h3>
           <p>{t('info_data_future_desc')}</p>
           <ul>
             <li><strong>TEU</strong> — Tablón Edictal Único (edictes judicials)</li>

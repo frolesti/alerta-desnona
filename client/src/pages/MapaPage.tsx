@@ -16,22 +16,22 @@ import { useTranslation } from '../i18n/LanguageContext'
 const caseIconProgramat = L.divIcon({
   className: 'case-marker programat',
   html: '<div class="case-marker-dot programat"></div>',
-  iconSize: [10, 10],
-  iconAnchor: [5, 5],
+  iconSize: [16, 16],
+  iconAnchor: [8, 8],
 })
 
 const caseIconImminent = L.divIcon({
   className: 'case-marker imminent',
   html: '<div class="case-marker-dot imminent"></div>',
-  iconSize: [14, 14],
-  iconAnchor: [7, 7],
+  iconSize: [20, 20],
+  iconAnchor: [10, 10],
 })
 
 const caseIconExecutat = L.divIcon({
   className: 'case-marker executat',
   html: '<div class="case-marker-dot executat"></div>',
-  iconSize: [8, 8],
-  iconAnchor: [4, 4],
+  iconSize: [14, 14],
+  iconAnchor: [7, 7],
 })
 
 type EstatFilter = 'tots' | 'imminent' | 'programat'
@@ -167,9 +167,9 @@ export default function MapaPage() {
           {/* ---- Real individual cases with clustering ---- */}
           <MarkerClusterGroup
             chunkedLoading
-            maxClusterRadius={45}
+            maxClusterRadius={(zoom: number) => (zoom < 7 ? 90 : zoom < 10 ? 70 : 50)}
             zoomToBoundsOnClick={true}
-            spiderfyOnMaxZoom={false}
+            spiderfyOnMaxZoom={true}
             showCoverageOnHover={false}
             iconCreateFunction={createClusterIcon}
             removeOutsideVisibleBounds={true}
@@ -277,7 +277,7 @@ export default function MapaPage() {
           onClick={() => setPanelState('expanded')}
           aria-label={t('popup_toggle_panel')}
         >
-          <span className="mini-bar-icon" aria-hidden="true">📊</span>
+          <span className="mini-bar-icon" aria-hidden="true"></span>
           <span className="mini-bar-content">
             <span className="mini-bar-title">{t('map_title')}</span>
             <span className="mini-bar-meta">

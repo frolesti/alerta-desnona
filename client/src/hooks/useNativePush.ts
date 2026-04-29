@@ -39,7 +39,7 @@ export function useNativePush(userId?: string): NativePushState {
 
     // Token registrat amb èxit
     const regListener = PushNotifications.addListener('registration', (tokenResult) => {
-      console.log('📱 FCM/APNs token:', tokenResult.value);
+      console.log('FCM/APNs token:', tokenResult.value);
       setToken(tokenResult.value);
       setIsRegistered(true);
 
@@ -55,7 +55,7 @@ export function useNativePush(userId?: string): NativePushState {
 
     // Error durant el registre
     const errorListener = PushNotifications.addListener('registrationError', (err) => {
-      console.error('❌ Error registrant push natiu:', err);
+      console.error('Error registrant push natiu:', err);
       setError(err.error || 'Error registrant push notifications');
     });
 
@@ -63,7 +63,7 @@ export function useNativePush(userId?: string): NativePushState {
     const receivedListener = PushNotifications.addListener(
       'pushNotificationReceived',
       (notification) => {
-        console.log('🔔 Push rebut (foreground):', notification);
+        console.log('Push rebut (foreground):', notification);
       }
     );
 
@@ -71,7 +71,7 @@ export function useNativePush(userId?: string): NativePushState {
     const actionListener = PushNotifications.addListener(
       'pushNotificationActionPerformed',
       (action) => {
-        console.log('👆 Push action:', action);
+        console.log('Push action:', action);
         // Navegar a la URL si n'hi ha
         const url = action.notification.data?.url;
         if (url && typeof url === 'string') {

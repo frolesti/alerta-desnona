@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { getDB } from '../db/database';
 import { v4 as uuid } from 'uuid';
+import { enviarBenvinguda, isEmailConfigured } from '../services/email';
 
 export const usuariRoutes = Router();
 
@@ -28,20 +29,24 @@ usuariRoutes.post('/registre', (req: Request, res: Response) => {
 
     // Create subscriptions
     const insertSub = db.prepare('INSERT INTO subscripcions (id, usuari_id, tipus, valor) VALUES (?, ?, ?, ?)');
-    
+    const zonesText: string[] = [];
+
     if (comarques && Array.isArray(comarques)) {
       for (const comarca of comarques) {
         insertSub.run(uuid(), id, 'comarca', comarca);
+        zonesText.push(`Comarca: ${comarca}`);
       }
     }
     if (comunitats && Array.isArray(comunitats)) {
       for (const comunitat of comunitats) {
         insertSub.run(uuid(), id, 'comunitat', comunitat);
+        zonesText.push(`Comunitat: ${comunitat}`);
       }
     }
     if (provincies && Array.isArray(provincies)) {
       for (const provincia of provincies) {
         insertSub.run(uuid(), id, 'provincia', provincia);
+        zonesText.push(`Província: ${provincia}`);
       }
     }
 
@@ -52,6 +57,14 @@ usuariRoutes.post('/registre', (req: Request, res: Response) => {
 
     const usuari = db.prepare('SELECT * FROM usuaris WHERE id = ?').get(id) as Record<string, unknown>;
     const subscripcions = db.prepare('SELECT * FROM subscripcions WHERE usuari_id = ?').all(id);
+
+    // Enviar email de benvinguda (no bloqueja la resposta)
+    if (notificacions_email !== false && isEmailConfigured()) {
+      const baseUrl = process.env.PUBLIC_BASE_URL || 'https://alerta-desnona-production.up.railway.app';
+      enviarBenvinguda(email, nom || null, zonesText, baseUrl).catch((err) => {
+        console.error('Error enviant email de benvinguda:', err);
+      });
+    }
 
     res.status(201).json({ ok: true, data: { ...usuari, subscripcions } });
   } catch (error) {

@@ -27,7 +27,7 @@ export function initEmail(): boolean {
   const pass = process.env.SMTP_PASS;
 
   if (!host || !user || !pass) {
-    console.warn('⚠️  Email desactivat: falten SMTP_HOST, SMTP_USER o SMTP_PASS');
+    console.warn(' Email desactivat: falten SMTP_HOST, SMTP_USER o SMTP_PASS');
     return false;
   }
 
@@ -39,7 +39,7 @@ export function initEmail(): boolean {
   });
 
   emailConfigured = true;
-  console.log(`📧 Email activat (${host}:${port})`);
+  console.log(`Email activat (${host}:${port})`);
   return true;
 }
 
@@ -74,11 +74,11 @@ interface UsuariEmail {
 
 function tipusProcedimentText(tipus: string): string {
   const map: Record<string, string> = {
-    ejecucion_hipotecaria: '🏦 Execució hipotecària',
-    impago_alquiler: '🏠 Impagament de lloguer',
-    ocupacion: '🚪 Ocupació',
-    cautelar: '⚖️ Mesura cautelar',
-    desconegut: '❓ Tipus desconegut',
+    ejecucion_hipotecaria: 'Execució hipotecària',
+    impago_alquiler: 'Impagament de lloguer',
+    ocupacion: 'Ocupació',
+    cautelar: 'Mesura cautelar',
+    desconegut: 'Tipus desconegut',
   };
   return map[tipus] || tipus;
 }
@@ -120,11 +120,11 @@ function generarHTMLResum(
         <small style="color:#6b7280;">${d.adreca_original}</small>
       </td>
       <td style="padding:12px 8px;white-space:nowrap;">
-        📅 ${d.data_desnonament}${d.hora_desnonament ? `<br/>🕐 ${d.hora_desnonament}` : ''}
+        ${d.data_desnonament}${d.hora_desnonament ? `<br/>${d.hora_desnonament}` : ''}
       </td>
       <td style="padding:12px 8px;">
         ${d.tipus_be || '—'}<br/>
-        ${d.quantitat_reclamada ? `💰 ${d.quantitat_reclamada}` : ''}
+        ${d.quantitat_reclamada ? `${d.quantitat_reclamada}` : ''}
       </td>
       <td style="padding:12px 8px;text-align:center;">
         <a href="${baseUrl}/cas/${d.id}" style="color:#dc2626;font-weight:600;text-decoration:none;">Veure →</a>
@@ -142,7 +142,7 @@ function generarHTMLResum(
 
     <!-- Header -->
     <div style="background:linear-gradient(135deg,#dc2626,#991b1b);padding:24px 32px;color:#fff;">
-      <h1 style="margin:0;font-size:22px;">🏠 Alerta Desnona</h1>
+      <h1 style="margin:0;font-size:22px;">Alerta Desnona</h1>
       <p style="margin:4px 0 0;opacity:0.9;font-size:14px;">Resum diari — ${avui}</p>
     </div>
 
@@ -171,7 +171,7 @@ function generarHTMLResum(
 
       <div style="text-align:center;margin:24px 0;">
         <a href="${baseUrl}/mapa" style="display:inline-block;background:#dc2626;color:#fff;padding:12px 28px;border-radius:6px;text-decoration:none;font-weight:600;font-size:14px;">
-          🗺️ Veure mapa complet
+          Veure mapa complet
         </a>
       </div>
     </div>
@@ -205,9 +205,58 @@ export async function enviarEmail(
     await transporter.sendMail({ from, to, subject, html });
     return true;
   } catch (error: any) {
-    console.error(`❌ Error enviant email a ${to}:`, error.message || error);
+    console.error(`Error enviant email a ${to}:`, error.message || error);
     return false;
   }
+}
+
+// ─── Email de benvinguda ─────────────────────────────────────
+
+export async function enviarBenvinguda(
+  to: string,
+  nom: string | null,
+  zones: string[],
+  baseUrl: string
+): Promise<boolean> {
+  if (!emailConfigured) return false;
+
+  const salutacio = nom ? `Hola ${nom},` : 'Hola,';
+  const llistaZones = zones.length > 0
+    ? zones.map((z) => `<li style="margin:4px 0;">${z}</li>`).join('')
+    : '<li>Tot l\'Estat espanyol</li>';
+
+  const html = `<!DOCTYPE html>
+<html lang="ca"><head><meta charset="utf-8"/></head>
+<body style="margin:0;padding:0;background:#f3f4f6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+  <div style="max-width:600px;margin:24px auto;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+    <div style="background:linear-gradient(135deg,#dc2626,#991b1b);padding:24px 32px;color:#fff;">
+      <h1 style="margin:0;font-size:22px;">Alerta Desnona</h1>
+      <p style="margin:4px 0 0;opacity:0.9;font-size:14px;">Subscripció confirmada</p>
+    </div>
+    <div style="padding:24px 32px;color:#374151;font-size:15px;line-height:1.6;">
+      <p>${salutacio}</p>
+      <p>T'has subscrit correctament a les alertes de desnonaments. A partir d'ara rebràs avisos quan es publiqui un desnonament a les teves zones d'interès:</p>
+      <ul style="background:#f9fafb;border-radius:6px;padding:16px 24px;">${llistaZones}</ul>
+      <p>Les fonts oficials que consultem són el <strong>BOE</strong> (subhastes judicials i edictes), el <strong>CGPJ</strong> (estadística judicial) i l'<strong>INE</strong> (estadística d'execucions hipotecàries).</p>
+      <p><strong>Què rebràs:</strong></p>
+      <ul>
+        <li>Avís individual quan un desnonament a les teves zones passi a ser <strong>imminent</strong> (menys de 48 h).</li>
+        <li>Resum diari (8:00 h) amb els casos previstos pels propers 7 dies, si n'hi ha.</li>
+      </ul>
+      <div style="text-align:center;margin:24px 0;">
+        <a href="${baseUrl}" style="display:inline-block;background:#dc2626;color:#fff;padding:12px 28px;border-radius:6px;text-decoration:none;font-weight:600;">Obrir el mapa</a>
+      </div>
+      <p style="font-size:13px;color:#6b7280;">Si no has estat tu qui s'ha subscrit amb aquesta adreça, ignora aquest missatge i la subscripció caducarà sense efecte.</p>
+    </div>
+    <div style="background:#f9fafb;padding:16px 32px;border-top:1px solid #e5e7eb;text-align:center;">
+      <p style="margin:0;font-size:12px;color:#9ca3af;">
+        <a href="${baseUrl}/alertes" style="color:#dc2626;">Gestionar les meves alertes</a>
+      </p>
+    </div>
+  </div>
+</body></html>`;
+
+  return enviarEmail(to, 'Subscripció confirmada — Alerta Desnona', html);
 }
 
 // ─── Resum diari ─────────────────────────────────────────────
@@ -237,7 +286,7 @@ export async function enviarResumDiari(): Promise<{
     .all() as DesnonamentResum[];
 
   if (desnonaments.length === 0) {
-    console.log('📧 Resum diari: cap desnonament pendent → no s\'envia email');
+    console.log('Resum diari: cap desnonament pendent → no s\'envia email');
     return { enviats: 0, errors: 0 };
   }
 
@@ -271,7 +320,7 @@ export async function enviarResumDiari(): Promise<{
     if (desnonamentsUsuari.length === 0) continue;
 
     const html = generarHTMLResum(desnonamentsUsuari, u.nom, baseUrl);
-    const subject = `⚠️ ${desnonamentsUsuari.length} desnonament${desnonamentsUsuari.length > 1 ? 's' : ''} programat${desnonamentsUsuari.length > 1 ? 's' : ''} — Alerta Desnona`;
+    const subject = `${desnonamentsUsuari.length} desnonament${desnonamentsUsuari.length > 1 ? 's' : ''} programat${desnonamentsUsuari.length > 1 ? 's' : ''} — Alerta Desnona`;
 
     const ok = await enviarEmail(u.email, subject, html);
     if (ok) enviats++;
@@ -279,7 +328,7 @@ export async function enviarResumDiari(): Promise<{
   }
 
   if (enviats > 0 || errors > 0) {
-    console.log(`📧 Resum diari: ${enviats} emails enviats, ${errors} errors`);
+    console.log(`Resum diari: ${enviats} emails enviats, ${errors} errors`);
   }
 
   return { enviats, errors };
@@ -321,15 +370,15 @@ export async function notificarDesnonamentPerEmail(
 <body style="margin:0;padding:0;background:#f3f4f6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
   <div style="max-width:560px;margin:24px auto;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
     <div style="background:#dc2626;padding:20px 28px;color:#fff;">
-      <h1 style="margin:0;font-size:18px;">⚠️ Desnonament imminent</h1>
+      <h1 style="margin:0;font-size:18px;">Desnonament imminent</h1>
     </div>
     <div style="padding:24px 28px;">
       <p>${nom}</p>
       <p>S'ha detectat un desnonament imminent a una zona d'alerta teva:</p>
       <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:6px;padding:16px;margin:16px 0;">
-        <p style="margin:0 0 8px;"><strong>📍 ${d.localitat || 'Desconeguda'}, ${d.provincia || ''}</strong></p>
+        <p style="margin:0 0 8px;"><strong>${d.localitat || 'Desconeguda'}, ${d.provincia || ''}</strong></p>
         <p style="margin:0 0 4px;color:#6b7280;font-size:13px;">${d.adreca_original}</p>
-        <p style="margin:8px 0 0;"><strong>📅 ${d.data_desnonament}</strong>${d.hora_desnonament ? ` a les ${d.hora_desnonament}` : ''}</p>
+        <p style="margin:8px 0 0;"><strong>${d.data_desnonament}</strong>${d.hora_desnonament ? ` a les ${d.hora_desnonament}` : ''}</p>
         <p style="margin:4px 0 0;font-size:13px;color:#6b7280;">${tipusProcedimentText(d.tipus_procediment)}</p>
       </div>
       <div style="text-align:center;margin:20px 0;">
@@ -345,6 +394,6 @@ export async function notificarDesnonamentPerEmail(
 </body>
 </html>`;
 
-  const subject = `⚠️ Desnonament imminent — ${d.localitat || d.provincia || 'Alerta Desnona'}`;
+  const subject = `Desnonament imminent — ${d.localitat || d.provincia || 'Alerta Desnona'}`;
   return enviarEmail(u.email, subject, html);
 }

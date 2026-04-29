@@ -200,9 +200,9 @@ export default function CasDetallPage() {
       {/* Data card */}
       <div className="cas-detail-section cas-detail-date-section">
         <div className="date-header">
-          <h3>📅 {t('detail_date_subhasta')}</h3>
+          <h3>{t('detail_date_subhasta')}</h3>
           <span className="date-big">{formatDateLong(cas.data_desnonament, lang)}</span>
-          {cas.hora_desnonament && <span className="date-hora">🕐 {cas.hora_desnonament}</span>}
+          {cas.hora_desnonament && <span className="date-hora">{cas.hora_desnonament}</span>}
         </div>
         <p className="date-explanation">{t('detail_date_explanation')}</p>
       </div>
@@ -211,14 +211,14 @@ export default function CasDetallPage() {
       <div className="cas-detail-grid">
         {/* Jutjat */}
         <div className="cas-detail-item">
-          <label>⚖️ {t('casos_jutjat')}</label>
+          <label>{t('casos_jutjat')}</label>
           {cas.jutjat ? (
             <div className="jutjat-info">
               <span className="jutjat-nom">{cas.jutjat}</span>
-              {jutjatCity && <span className="jutjat-ciutat-dest">📍 {jutjatCity}</span>}
+              {jutjatCity && <span className="jutjat-ciutat-dest">{jutjatCity}</span>}
               {cas.jutjat_adreca && <span className="jutjat-adreca">{cas.jutjat_adreca}</span>}
-              {cas.jutjat_telefon && <span className="jutjat-contacte">📞 {cas.jutjat_telefon}</span>}
-              {cas.jutjat_email && <span className="jutjat-contacte">✉️ {cas.jutjat_email}</span>}
+              {cas.jutjat_telefon && <span className="jutjat-contacte">{cas.jutjat_telefon}</span>}
+              {cas.jutjat_email && <span className="jutjat-contacte">{cas.jutjat_email}</span>}
             </div>
           ) : (
             <span className="no-data">{t('detail_no_data')}</span>
@@ -227,7 +227,7 @@ export default function CasDetallPage() {
 
         {/* Procediment */}
         <div className="cas-detail-item">
-          <label>📋 {t('casos_procediment')}</label>
+          <label>{t('casos_procediment')}</label>
           {cas.num_procediment ? (
             <div className="proc-info">
               <span className="proc-label">{t('detail_boe_ref')}</span>
@@ -252,14 +252,14 @@ export default function CasDetallPage() {
 
         {/* Tipus de bé */}
         <div className="cas-detail-item">
-          <label>🏠 {t('detail_tipus_subhasta')}</label>
+          <label>{t('detail_tipus_subhasta')}</label>
           <span>{cas.tipus_be ? t(`tipus_be_${cas.tipus_be.toLowerCase().replace(/\s+/g, '_')}` as any) || cas.tipus_be : t('detail_no_data')}</span>
           {cas.vivenda_habitual === 1 && <span className="tag-habitual">{t('detail_habitatge_habitual')}</span>}
         </div>
 
         {/* Referència cadastral */}
         <div className="cas-detail-item">
-          <label>🗺️ {t('detail_ref_cadastral')}</label>
+          <label>{t('detail_ref_cadastral')}</label>
           {cas.ref_catastral ? (
             <a
               href={`https://www1.sedecatastro.gob.es/CYCBienInmueble/OVCBusqueda.aspx?RC1=${cas.ref_catastral.substring(0,7)}&RC2=${cas.ref_catastral.substring(7,14)}`}
@@ -275,7 +275,7 @@ export default function CasDetallPage() {
 
       {/* Tipus subhasta */}
       <div className="cas-detail-section cas-detail-motiu">
-        <h3>⚠️ {t('detail_motiu_title')}</h3>
+        <h3>{t('detail_motiu_title')}</h3>
         {cas.tipus_subhasta ? (
           <div className="motiu-content">
             <span className="motiu-type">{tipusSubhastaHuman(cas.tipus_subhasta, t)}</span>
@@ -293,7 +293,7 @@ export default function CasDetallPage() {
 
       {/* Informació financera */}
       <div className="cas-detail-section">
-        <h3>💰 {t('detail_info_financera')}</h3>
+        <h3>{t('detail_info_financera')}</h3>
         {cas.quantitat_reclamada || cas.valor_subhasta ? (
           <div className="financial-grid">
             {cas.quantitat_reclamada && (
@@ -339,27 +339,27 @@ export default function CasDetallPage() {
               </Popup>
             </Marker>
           </MapContainer>
-          {geocodatLabel && <p className="map-approx-note">📍 {geocodatLabel === 'Cadastre' ? t('detail_map_exact') || 'Ubicació exacta (Cadastre)' : t('detail_map_approx')}</p>}
+          {geocodatLabel && <p className="map-approx-note">{geocodatLabel === 'Cadastre' ? t('detail_map_exact') || 'Ubicació exacta (Cadastre)' : t('detail_map_approx')}</p>}
         </div>
       ) : (
         <div className="cas-detail-map">
-          <p className="no-data">📍 {t('detail_no_geocode')}</p>
+          <p className="no-data">{t('detail_no_geocode')}</p>
         </div>
       )}
 
       {/* Source */}
       <div className="cas-detail-source">
-        <h3>🔗 {t('case_source')}</h3>
+        <h3>{t('case_source')}</h3>
         <p>{cas.font_oficial}</p>
         <div className="cas-detail-links">
           {cas.url_font && (
             <a href={cas.url_font} target="_blank" rel="noopener noreferrer" className="source-link">
-              📄 Portal de Subastas BOE
+              Portal de Subastas BOE
             </a>
           )}
           {cas.document_url && cas.document_url.includes('boe.es') && (
             <a href={cas.document_url} target="_blank" rel="noopener noreferrer" className="source-link source-link-secondary">
-              📜 {t('detail_boe_anunci')}
+              {t('detail_boe_anunci')}
             </a>
           )}
         </div>

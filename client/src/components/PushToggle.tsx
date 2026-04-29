@@ -32,7 +32,7 @@ export default function PushToggle({ userId }: Props) {
   if (!isSupported) {
     return (
       <div className="push-toggle push-toggle--unsupported">
-        <span className="push-toggle__icon">🔕</span>
+        <span className="push-toggle__icon"></span>
         <span className="push-toggle__text">
           Les notificacions push no estan disponibles en aquest navegador
         </span>
@@ -43,7 +43,7 @@ export default function PushToggle({ userId }: Props) {
   if (permission === 'denied') {
     return (
       <div className="push-toggle push-toggle--denied">
-        <span className="push-toggle__icon">🚫</span>
+        <span className="push-toggle__icon"></span>
         <span className="push-toggle__text">
           {isNative
             ? "Notificacions bloquejades. Activa-les a Configuració > Aplicacions."
@@ -57,7 +57,7 @@ export default function PushToggle({ userId }: Props) {
     <div className="push-toggle">
       <div className="push-toggle__row">
         <span className="push-toggle__icon">
-          {isActive ? '🔔' : '🔕'}
+          {isActive ? '' : ''}
         </span>
         <span className="push-toggle__text">
           {isActive

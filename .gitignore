@@ -5,3 +5,6 @@ dist/
 !.env.example
 .DS_Store
 server/data/
+
+prod-pipeline*.log
+
