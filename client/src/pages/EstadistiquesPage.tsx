@@ -34,10 +34,34 @@ function pct(part: number, total: number): string {
   return (part / total * 100).toFixed(1)
 }
 
+// Mostra una variació amb signe explícit i color semàntic correcte:
+//   pujada de desnonaments  → vermell (negatiu socialment)
+//   baixada de desnonaments → verd
+function DeltaBadge({ value, lang = 'ca' }: { value: number | null | undefined; lang?: string }) {
+  if (value == null || isNaN(value)) return <span className="delta delta--neutral">—</span>
+  const rounded = Math.round(value * 10) / 10
+  if (rounded === 0) return <span className="delta delta--neutral">0%</span>
+  const isUp = rounded > 0
+  const sign = isUp ? '+' : '−'
+  const labels: Record<string, { more: string; less: string }> = {
+    ca: { more: 'més', less: 'menys' },
+    es: { more: 'más', less: 'menos' },
+    gl: { more: 'máis', less: 'menos' },
+    eu: { more: 'gehiago', less: 'gutxiago' },
+  }
+  const l = labels[lang] || labels.ca
+  return (
+    <span className={`delta ${isUp ? 'delta--bad' : 'delta--good'}`}>
+      <span className="delta-num">{sign}{Math.abs(rounded)}%</span>
+      <span className="delta-word">{isUp ? l.more : l.less}</span>
+    </span>
+  )
+}
+
 type Tab = 'casos' | 'resum' | 'provincies' | 'evolucio'
 
 export default function EstadistiquesPage() {
-  const { t } = useTranslation()
+  const { t, lang } = useTranslation()
 
   // CGPJ primary data
   const [cgpjResum, setCgpjResum] = useState<CGPJResum | null>(null)
@@ -220,8 +244,8 @@ export default function EstadistiquesPage() {
         <div className="stats-hero-item">
           {yoyChange !== null ? (
             <>
-              <div className={`stats-hero-value ${yoyChange > 0 ? 'up' : yoyChange < 0 ? 'down' : ''}`}>
-                {yoyChange > 0 ? '\u25B2' : yoyChange < 0 ? '\u25BC' : ''} {Math.abs(Math.round(yoyChange * 10) / 10)}%
+              <div className="stats-hero-delta">
+                <DeltaBadge value={yoyChange} lang={lang} />
               </div>
               <div className="stats-hero-label">{t('stats_yoy_label')}</div>
               <div className="stats-hero-year">{cgpjAnyAnterior} → {cgpjAny}</div>
@@ -405,8 +429,8 @@ export default function EstadistiquesPage() {
                     <td className="num">{formatNum(c.lanzaments_lau)}</td>
                     <td className="num">{formatNum(c.lanzaments_hipotecaria)}</td>
                     <td className="num">{formatNum(c.lanzaments_altres)}</td>
-                    <td className={`num ${v > 0 ? 'up' : v < 0 ? 'down' : ''}`}>
-                      {v > 0 ? '\u25B2' : v < 0 ? '\u25BC' : '\u2013'} {Math.abs(v)}%
+                    <td className="num">
+                      <DeltaBadge value={v} lang={lang} />
                     </td>
                     <td className="bar-col">
                       <div className="bar-bg">
@@ -535,8 +559,8 @@ export default function EstadistiquesPage() {
                       <td className="num">{formatNum(td.lau)}</td>
                       <td className="num">{formatNum(td.hipotecaria)}</td>
                       <td className="num">{formatNum(td.altres)}</td>
-                      <td className={`num ${variacio > 0 ? 'up' : variacio < 0 ? 'down' : ''}`}>
-                        {prev ? `${variacio > 0 ? '\u25B2' : variacio < 0 ? '\u25BC' : '\u2013'} ${Math.abs(Math.round(variacio * 10) / 10)}%` : '\u2013'}
+                      <td className="num">
+                        {prev ? <DeltaBadge value={variacio} lang={lang} /> : '–'}
                       </td>
                     </tr>
                   )
@@ -568,7 +592,7 @@ export default function EstadistiquesPage() {
                           <td>{c.comunitat_autonoma}</td>
                           <td className="num">{formatNum(c.lanzaments_total)}</td>
                           <td className={`num ${v > 0 ? 'up' : v < 0 ? 'down' : ''}`}>
-                            {v > 0 ? '\u25B2' : v < 0 ? '\u25BC' : '\u2013'} {Math.abs(v)}%
+                            <DeltaBadge value={v} lang={lang} />
                           </td>
                         </tr>
                       )

@@ -181,18 +181,14 @@
 
 [data-theme="light"] .filtres-bar select,
 [data-theme="light"] .filtres-bar input,
-[data-theme="light"] .sort-select,
-[data-theme="light"] .lang-select {
+[data-theme="light"] .sort-select {
   border-color: rgba(0,0,0,0.15);
   background-color: #fff;
   color: #1f2937;
 }
 [data-theme="light"] .lang-select {
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path fill='none' stroke='%23475569' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' d='M1 1l4 4 4-4'/></svg>");
-}
-[data-theme="light"] .lang-select:focus {
-  border-color: #94a3b8;
-  box-shadow: 0 0 0 2px rgba(148, 163, 184, 0.3);
+  /* Manté el mateix estil taronja arrodonit en mode clar */
+  background-color: #fff;
 }
 
 [data-theme="light"] .form-group input[type="email"],
@@ -478,31 +474,37 @@ a:hover {
 }
 
 .lang-select {
-  padding: 0 28px 0 12px;
+  padding: 0 32px 0 14px;
   height: 34px;
-  background-color: var(--color-bg-secondary);
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path fill='none' stroke='%23999' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' d='M1 1l4 4 4-4'/></svg>");
+  background-color: transparent;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path fill='none' stroke='%23ea580c' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round' d='M1 1l4 4 4-4'/></svg>");
   background-repeat: no-repeat;
-  background-position: right 10px center;
-  border: 1px solid var(--color-border, rgba(255,255,255,0.12));
-  border-radius: 6px;
-  color: var(--color-text);
+  background-position: right 12px center;
+  border: 1px solid var(--color-primary);
+  border-radius: 999px;
+  color: var(--color-primary);
   font-size: 0.85rem;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: border-color 0.15s, background-color 0.15s;
+  transition: background-color 0.15s, color 0.15s, box-shadow 0.15s;
   appearance: none;
   -webkit-appearance: none;
 }
 
 .lang-select:hover {
-  border-color: var(--color-text-muted);
+  background-color: rgba(234, 88, 12, 0.08);
 }
 
 .lang-select:focus {
   outline: none;
-  border-color: var(--color-text-muted);
-  box-shadow: 0 0 0 2px rgba(148, 163, 184, 0.25);
+  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.2);
+}
+
+/* Options inside the open dropdown — browsers honour these in modern Chromium/Edge/Safari */
+.lang-select option {
+  background-color: #fff;
+  color: #1f2937;
+  font-weight: 500;
 }
 
 /* Sort select */
@@ -2010,6 +2012,35 @@ a:hover {
   font-weight: 700;
   letter-spacing: 0.02em;
 }
+
+/* === Delta badge (variació +/- amb paraula) === */
+.delta {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.delta-num { font-size: 0.95em; }
+.delta-word {
+  font-size: 0.72em;
+  font-weight: 600;
+  text-transform: lowercase;
+  opacity: 0.85;
+}
+.delta--bad  { color: #ef4444; }   /* pugen els desnonaments → vermell */
+.delta--good { color: #16a34a; }   /* baixen els desnonaments → verd */
+.delta--neutral { color: var(--color-text-secondary); font-weight: 500; }
+
+.stats-hero-delta {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  margin-bottom: 2px;
+}
+.stats-hero-delta .delta-num { font-size: 1em; }
+.stats-hero-delta .delta-word { font-size: 0.4em; }
 .card-stat-breakdown {
   display: flex;
   flex-wrap: wrap;
@@ -2483,6 +2514,11 @@ a:hover {
 .chart-scroll {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+  width: 100%;
+}
+.chart-scroll svg {
+  display: block;
+  min-width: 540px;
 }
 
 [data-theme="light"] .chart-card {

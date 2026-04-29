@@ -1,5 +1,19 @@
 import { useTranslation } from '../i18n/LanguageContext'
 
+// Renderitza **text** com a <strong>text</strong> dins d’un paràgraf, conservant la resta com a text pla.
+function Md({ children }: { children: string }) {
+  const parts = children.split(/(\*\*[^*]+\*\*)/g)
+  return (
+    <>
+      {parts.map((p, i) =>
+        p.startsWith('**') && p.endsWith('**')
+          ? <strong key={i}>{p.slice(2, -2)}</strong>
+          : <span key={i}>{p}</span>
+      )}
+    </>
+  )
+}
+
 export default function InfoPage() {
   const { t } = useTranslation()
 
@@ -100,7 +114,7 @@ export default function InfoPage() {
       {/* ===== EXISTING SECTIONS ===== */}
       <div className="info-section">
         <h2>{t('info_data_title')}</h2>
-        <p>{t('info_data_intro')}</p>
+        <p><Md>{t('info_data_intro')}</Md></p>
 
         <div className="info-card">
           <h3>{t('info_data_current_source_title')}</h3>
@@ -108,14 +122,15 @@ export default function InfoPage() {
           <ul>
             <li><strong>Portal de Subastas del BOE</strong> — <a href="https://subastas.boe.es" target="_blank" rel="noopener noreferrer">subastas.boe.es</a></li>
           </ul>
-          <p className="info-note">{t('info_data_boe_explanation')}</p>
+          <p className="info-note"><Md>{t('info_data_boe_explanation')}</Md></p>
         </div>
 
         <div className="info-card">
           <h3>{t('info_data_stats_source_title')}</h3>
           <p>{t('info_data_stats_source_desc')}</p>
           <ul>
-            <li><strong>INE — Instituto Nacional de Estadística</strong> — <a href="https://www.ine.es/jaxiT3/Tabla.htm?t=10743" target="_blank" rel="noopener noreferrer">Taula 10743</a></li>
+            <li><strong>CGPJ — Consejo General del Poder Judicial</strong> — <a href="https://www.poderjudicial.es/cgpj/es/Temas/Estadistica-Judicial/Estadistica-por-temas/Datos-penales--civiles-y-laborales/Civil-y-laboral/Lanzamientos-practicados/" target="_blank" rel="noopener noreferrer">Estadística de lançaments practicats</a> — dades trimestrals per comunitat autònoma i tipus (LAU, LEC, altres). Origen del recompte real de desnonaments executats.</li>
+            <li><strong>INE — Instituto Nacional de Estadística</strong> — <a href="https://www.ine.es/jaxiT3/Tabla.htm?t=10743" target="_blank" rel="noopener noreferrer">Taula 10743</a> — sistema judicial: lançaments per CCAA i any (sèrie llarga).</li>
           </ul>
         </div>
 
@@ -123,9 +138,9 @@ export default function InfoPage() {
           <h3>{t('info_data_limitations_title')}</h3>
           <p>{t('info_data_limitations_desc')}</p>
           <ul>
-            <li>{t('info_data_limitation_1')}</li>
-            <li>{t('info_data_limitation_2')}</li>
-            <li>{t('info_data_limitation_3')}</li>
+            <li><Md>{t('info_data_limitation_1')}</Md></li>
+            <li><Md>{t('info_data_limitation_2')}</Md></li>
+            <li><Md>{t('info_data_limitation_3')}</Md></li>
           </ul>
         </div>
 
@@ -133,8 +148,9 @@ export default function InfoPage() {
           <h3>{t('info_data_future_title')}</h3>
           <p>{t('info_data_future_desc')}</p>
           <ul>
-            <li><strong>TEU</strong> — Tablón Edictal Único (edictes judicials)</li>
-            <li><strong>CGPJ</strong> — Consejo General del Poder Judicial</li>
+            <li><strong>TEU</strong> — Tablón Edictal Judicial Único: edictes judicials de notificacions, citacions i requeriments. Cobriria avisos previs al llançament que avui no veiem.</li>
+            <li><strong>SIPH / Servei d’Intermediació</strong> i <strong>Ofideute</strong> — dades de mediació hipotecària de Generalitats; només són públiques de manera agregada.</li>
+            <li><strong>Sindicat de Llogateres / PAH</strong> — registres ciutadans de bloquejos i casos no judicialitzats (no són font oficial).</li>
           </ul>
           <h4>{t('info_data_regional')}</h4>
           <ul className="info-compact-list">
@@ -225,7 +241,7 @@ export default function InfoPage() {
 
       <div className="info-section">
         <h2>{t('info_stats_title')}</h2>
-        <p>{t('info_stats_p1')}</p>
+        <p><Md>{t('info_stats_p1')}</Md></p>
       </div>
 
       <div className="info-section">
