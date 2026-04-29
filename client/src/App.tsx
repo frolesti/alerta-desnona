@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom'
 import Header from './components/Header'
+import Footer from './components/Footer'
 import MapaPage from './pages/MapaPage'
 import DetallPage from './pages/DetallPage'
 import CasDetallPage from './pages/CasDetallPage'
@@ -21,6 +22,7 @@ function App() {
           <Route path="/info" element={<InfoPage />} />
         </Routes>
       </main>
+      <Footer />
     </div>
   )
 }

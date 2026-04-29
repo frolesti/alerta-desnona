@@ -2,6 +2,7 @@ import { NavLink } from 'react-router-dom'
 import { useTranslation } from '../i18n/LanguageContext'
 import { useTheme } from '../theme/ThemeContext'
 import { LANG_LABELS, type Lang } from '../i18n/translations'
+import CustomSelect from './CustomSelect'
 
 function ThemeIcon({ mode }: { mode: string }) {
   if (mode === 'light') {
@@ -63,15 +64,12 @@ export default function Header() {
           <ThemeIcon mode={mode} />
         </button>
 
-        <select
-          className="lang-select"
+        <CustomSelect
           value={lang}
-          onChange={e => setLang(e.target.value as Lang)}
-        >
-          {(Object.keys(LANG_LABELS) as Lang[]).map(l => (
-            <option key={l} value={l}>{LANG_LABELS[l]}</option>
-          ))}
-        </select>
+          options={(Object.keys(LANG_LABELS) as Lang[]).map(l => ({ value: l, label: LANG_LABELS[l] }))}
+          onChange={v => setLang(v as Lang)}
+          className="lang-select"
+        />
       </nav>
     </header>
   )

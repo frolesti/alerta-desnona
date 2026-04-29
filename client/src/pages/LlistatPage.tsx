@@ -1,4 +1,5 @@
-﻿import { useEffect, useState } from 'react'
+﻿import CustomSelect from '../components/CustomSelect'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getINEData } from '../api'
 import type { EstadisticaINE } from '../api'
@@ -83,15 +84,16 @@ export default function LlistatPage() {
       </p>
 
       <div className="filtres-bar">
-        <select
+        <CustomSelect
           value={filterCom}
-          onChange={e => setFilterCom(e.target.value)}
-        >
-          <option value="">{t('filter_all_communities')}</option>
-          {COMUNITATS.map(c => (
-            <option key={c} value={c}>{c}</option>
-          ))}
-        </select>
+          options={[
+            { value: '', label: t('filter_all_communities') },
+            ...COMUNITATS.map(c => ({ value: c, label: c }))
+          ]}
+          onChange={v => setFilterCom(v)}
+          placeholder={t('filter_all_communities')}
+          className="comunitat-select"
+        />
 
         <input
           type="text"
@@ -100,17 +102,18 @@ export default function LlistatPage() {
           onChange={e => setCerca(e.target.value)}
         />
 
-        <select
-          className="sort-select"
+        <CustomSelect
           value={sortBy}
-          onChange={e => setSortBy(e.target.value)}
-        >
-          <option value="vivendes_desc">{t('stats_housing')} ^</option>
-          <option value="vivendes_asc">{t('stats_housing')} v</option>
-          <option value="provincia">{t('stats_province')} A-Z</option>
-          <option value="comunitat">{t('stats_community')} A-Z</option>
-          <option value="total_desc">{t('stats_total_properties')} ^</option>
-        </select>
+          options={[
+            { value: 'vivendes_desc', label: t('stats_housing') + ' ^' },
+            { value: 'vivendes_asc', label: t('stats_housing') + ' v' },
+            { value: 'provincia', label: t('stats_province') + ' A-Z' },
+            { value: 'comunitat', label: t('stats_community') + ' A-Z' },
+            { value: 'total_desc', label: t('stats_total_properties') + ' ^' },
+          ]}
+          onChange={v => setSortBy(v)}
+          className="sort-select"
+        />
       </div>
 
       {sorted.length === 0 ? (

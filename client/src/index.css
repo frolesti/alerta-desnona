@@ -1,3 +1,127 @@
+/* === Custom Select modern === */
+.custom-select {
+  position: relative;
+  display: inline-block;
+  min-width: 120px;
+  font-size: 1rem;
+}
+.custom-select-btn {
+  width: 100%;
+  background: var(--color-bg-secondary);
+  color: var(--color-primary);
+  border: 1.5px solid var(--color-primary);
+  border-radius: 999px;
+  padding: 0 32px 0 14px;
+  height: 34px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+  outline: none;
+}
+.custom-select-btn.open,
+.custom-select-btn:focus {
+  background: rgba(234,88,12,0.08);
+  box-shadow: 0 0 0 3px rgba(234,88,12,0.18);
+}
+.custom-select-list {
+  position: absolute;
+  left: 0;
+  top: 110%;
+  min-width: 100%;
+  background: #fff;
+  color: #1f2937;
+  border: 1.5px solid var(--color-primary);
+  border-radius: 14px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.13);
+  z-index: 1000;
+  margin: 0;
+  padding: 4px 0;
+  list-style: none;
+  font-size: 0.97rem;
+  overflow: hidden;
+}
+.custom-select-list li {
+  padding: 8px 18px;
+  cursor: pointer;
+  transition: background 0.13s, color 0.13s;
+}
+.custom-select-list li.selected,
+.custom-select-list li:hover {
+  background: rgba(234,88,12,0.08);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+.custom-select-list li.selected {
+  position: relative;
+}
+.custom-select-list li.selected::after {
+  content: '✓';
+  color: var(--color-primary);
+  position: absolute;
+  right: 18px;
+  font-size: 1em;
+}
+@media (max-width: 600px) {
+  .custom-select-list {
+    font-size: 1.05rem;
+  }
+}
+/* === Footer modern === */
+.footer-main {
+  width: 100%;
+  background: var(--color-bg-card);
+  color: var(--color-text-secondary);
+  border-top: 1.5px solid var(--color-border, #232733);
+  padding: 0;
+  margin-top: 2rem;
+  font-size: 0.98rem;
+  letter-spacing: 0.01em;
+}
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.2rem 1.5rem 1.2rem 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.footer-links {
+  display: flex;
+  gap: 0.7em;
+  align-items: center;
+}
+.footer-links a {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.15s;
+}
+.footer-links a:hover {
+  color: var(--color-primary-dark);
+  text-decoration: underline;
+}
+.footer-sep {
+  color: var(--color-text-muted);
+  font-size: 1.1em;
+  margin: 0 0.2em;
+}
+@media (max-width: 600px) {
+  .footer-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 1.2rem 0.7rem;
+  }
+  .footer-links {
+    gap: 0.5em;
+  }
+}
 /* ===== Alerta Desnona - Estils Globals ===== */
 
 :root {
@@ -1851,7 +1975,8 @@ a:hover {
 .stats-page {
   max-width: 960px;
   margin: 0 auto;
-  padding: var(--space-lg);
+  padding: calc(var(--space-lg) + 18px) var(--space-lg) var(--space-lg) var(--space-lg);
+  /* padding-top extra per evitar scroll tallat a dalt */
 }
 
 .stats-hero {

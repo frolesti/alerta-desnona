@@ -1,3 +1,4 @@
+import CustomSelect from '../components/CustomSelect'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
@@ -332,20 +333,28 @@ export default function EstadistiquesPage() {
           </div>
 
           <div className="filtres-bar">
-            <select value={casosEstat} onChange={e => { setCasosEstat(e.target.value); setCasosPagina(1); setCasos([]); }}>
-              <option value="">{t('casos_filter_estat')}</option>
-              <option value="imminent">{t('estat_imminent')}</option>
-              <option value="programat">{t('estat_programat')}</option>
-              <option value="executat">{t('estat_executat')}</option>
-              <option value="suspès">{t('estat_suspes')}</option>
-              <option value="cancelat">{t('estat_cancelat')}</option>
-            </select>
-            <select value={casosProv} onChange={e => { setCasosProv(e.target.value); setCasosPagina(1); setCasos([]); }}>
-              <option value="">{t('casos_filter_totes')}</option>
-              {[...new Set(provincies.map(p => p.provincia))].sort().map(p => (
-                <option key={p} value={p}>{p}</option>
-              ))}
-            </select>
+            <CustomSelect
+              value={casosEstat}
+              options={[
+                { value: '', label: t('casos_filter_estat') },
+                { value: 'imminent', label: t('estat_imminent') },
+                { value: 'programat', label: t('estat_programat') },
+                { value: 'executat', label: t('estat_executat') },
+                { value: 'suspès', label: t('estat_suspes') },
+                { value: 'cancelat', label: t('estat_cancelat') },
+              ]}
+              onChange={v => { setCasosEstat(v); setCasosPagina(1); setCasos([]); }}
+              className="estat-select"
+            />
+            <CustomSelect
+              value={casosProv}
+              options={[
+                { value: '', label: t('casos_filter_totes') },
+                ...[...new Set(provincies.map(p => p.provincia))].sort().map(p => ({ value: p, label: p }))
+              ]}
+              onChange={v => { setCasosProv(v); setCasosPagina(1); setCasos([]); }}
+              className="provincia-select"
+            />
             <input
               type="text"
               placeholder={t('filter_search')}
