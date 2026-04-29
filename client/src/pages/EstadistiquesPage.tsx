@@ -14,6 +14,21 @@ function formatNum(n: number): string {
   return n.toLocaleString('ca-ES')
 }
 
+// Calcula ticks "rodons" per a un eix Y donat un valor màxim.
+// Retorna { max, ticks } amb 4-5 marques uniformes acabades en zeros.
+function niceTicks(maxValue: number, count = 4): { max: number; ticks: number[] } {
+  if (maxValue <= 0) return { max: 10, ticks: [0, 5, 10] }
+  const rawStep = maxValue / count
+  const mag = Math.pow(10, Math.floor(Math.log10(rawStep)))
+  const norm = rawStep / mag
+  const niceNorm = norm <= 1 ? 1 : norm <= 2 ? 2 : norm <= 2.5 ? 2.5 : norm <= 5 ? 5 : 10
+  const step = niceNorm * mag
+  const niceMax = Math.ceil(maxValue / step) * step
+  const ticks: number[] = []
+  for (let v = 0; v <= niceMax + 0.5; v += step) ticks.push(Math.round(v))
+  return { max: niceMax, ticks }
+}
+
 function pct(part: number, total: number): string {
   if (total === 0) return '0'
   return (part / total * 100).toFixed(1)
@@ -134,18 +149,19 @@ export default function EstadistiquesPage() {
   const maxComTotal = Math.max(...cgpjComunitats.map(c => c.lanzaments_total), 1)
   const maxProvTotal = Math.max(...cgpjProvincies.map(p => p.lanzaments_total), 1)
   const maxTendVal = Math.max(...cgpjTendencia.map(td => td.total), 1)
+  const yAxis = niceTicks(maxTendVal, 4)
 
   // Stacked chart
   const chartW = 700
   const chartH = 260
-  const chartPad = { top: 20, right: 20, bottom: 35, left: 55 }
+  const chartPad = { top: 20, right: 20, bottom: 35, left: 65 }
   const plotW = chartW - chartPad.left - chartPad.right
   const plotH = chartH - chartPad.top - chartPad.bottom
 
-  // Total line chart points
+  // Total line chart points (escalats sobre el màxim "rodó" de l'eix)
   const chartPoints = cgpjTendencia.map((td, i) => {
     const x = chartPad.left + (i / Math.max(cgpjTendencia.length - 1, 1)) * plotW
-    const y = chartPad.top + plotH - (td.total / maxTendVal) * plotH
+    const y = chartPad.top + plotH - (td.total / yAxis.max) * plotH
     return { x, y, ...td }
   })
   const areaPath = chartPoints.length > 0
@@ -178,6 +194,21 @@ export default function EstadistiquesPage() {
     <div className="stats-page">
       <h1 className="page-title">{t('stats_title')}</h1>
       <p className="page-subtitle">{t('stats_subtitle')}</p>
+
+      {/* Banner amb anys de cobertura i font */}
+      {cgpjTendencia.length > 0 && (
+        <div className="stats-source-banner">
+          <span className="pill">CGPJ</span>
+          <span>
+            <b>Període: {cgpjTendencia[0].any}–{cgpjTendencia[cgpjTendencia.length - 1].any}</b>
+            {' · '}Darrer any complet de referència: <b>{cgpjAnyAnterior ?? cgpjAny}</b>
+            {cgpjParcial && <> {' · '}Any en curs (<b>{cgpjParcial.any}</b>) parcial</>}
+          </span>
+          <span>
+            Font: <a href={cgpjUrlFont} target="_blank" rel="noopener noreferrer">{cgpjFont || 'Consejo General del Poder Judicial'}</a>
+          </span>
+        </div>
+      )}
 
       {/* Hero stats — CGPJ lanzamientos */}
       <div className="stats-hero">
@@ -422,8 +453,8 @@ export default function EstadistiquesPage() {
                       <span className="stat-label">{t('cgpj_lanzaments')}</span>
                     </div>
                     <div className="card-stat-breakdown">
-                      <span className="breakdown-mini seg-lau">{t('cgpj_lau_short')}: {formatNum(p.lanzaments_lau)}</span>
-                      <span className="breakdown-mini seg-hip">{t('cgpj_hip_short')}: {formatNum(p.lanzaments_hipotecaria)}</span>
+                      <span className="breakdown-mini seg-lau" title={t('cgpj_lau')}>{t('cgpj_lau_short')} <b>{formatNum(p.lanzaments_lau)}</b></span>
+                      <span className="breakdown-mini seg-hip" title={t('cgpj_hipotecari')}>{t('cgpj_hip_short')} <b>{formatNum(p.lanzaments_hipotecaria)}</b></span>
                     </div>
                   </div>
                   <div className="card-bar">
@@ -446,12 +477,11 @@ export default function EstadistiquesPage() {
             <h2>{t('stats_trend')}</h2>
             <div className="chart-scroll">
               <svg width="100%" height={chartH} viewBox={`0 0 ${chartW} ${chartH}`} preserveAspectRatio="xMidYMid meet" className="trend-chart">
-                {/* Grid lines */}
-                {[0, 0.25, 0.5, 0.75, 1].map(frac => {
-                  const y = chartPad.top + plotH - frac * plotH
-                  const val = Math.round(frac * maxTendVal)
+                {/* Grid lines amb ticks rodons */}
+                {yAxis.ticks.map(val => {
+                  const y = chartPad.top + plotH - (val / yAxis.max) * plotH
                   return (
-                    <g key={frac}>
+                    <g key={val}>
                       <line x1={chartPad.left} y1={y} x2={chartPad.left + plotW} y2={y}
                         stroke="var(--color-text-muted)" strokeWidth="0.5" strokeDasharray="4,4" opacity="0.4" />
                       <text x={chartPad.left - 8} y={y + 4} textAnchor="end" fontSize="10"
