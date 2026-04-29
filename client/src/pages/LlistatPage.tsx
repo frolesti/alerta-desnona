@@ -91,7 +91,6 @@ export default function LlistatPage() {
             ...COMUNITATS.map(c => ({ value: c, label: c }))
           ]}
           onChange={v => setFilterCom(v)}
-          placeholder={t('filter_all_communities')}
           className="comunitat-select"
         />
 
